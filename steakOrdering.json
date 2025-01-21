@@ -1,0 +1,25 @@
+{
+    "intention": "order",
+    "steak": {
+        "size": "medium",
+        "meat_type": "bison"
+    },
+    "cooking_style": {
+        "slot": null,
+        "value": null
+    },
+    "sauce": {
+        "slot": null,
+        "value": null
+    },
+    "salt": {
+        "slot": null,
+        "value": null
+    },
+    "count": {
+        "value": 1
+    },
+    "size": {
+        "value": "medium"
+    }
+}
