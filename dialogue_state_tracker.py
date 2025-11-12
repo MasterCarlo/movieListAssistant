@@ -2,7 +2,7 @@ class DialogueStateTracker:
     def __init__(self):
         self.intentions_json = None
         self.json_queue = None
-        self.last_six_turns = []
+        self.last_six_turns: list[str] = []
     
     def update_intentions_json(self, json):
         self.intentions_json = json
@@ -25,4 +25,3 @@ class DialogueStateTracker:
     def get_last_six_turns(self):
         return self.last_six_turns
 
-dialogueST = DialogueStateTracker()

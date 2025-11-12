@@ -1,0 +1,82 @@
+[
+  {
+    "id": 603,
+    "title": "The Matrix",
+    "director": "N/A",
+    "year": "1999",
+    "rating": 8.235,
+    "votes": 26970,
+    "runtime": 136,
+    "genres": [
+      "Action",
+      "Science Fiction"
+    ],
+    "plot": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+    "budget": 63000000,
+    "revenue": 463517383,
+    "imdb_id": "tt0133093",
+    "poster": "https://image.tmdb.org/t/p/w500/p96dm7sCMn4VYAStA6siNz30G1r.jpg",
+    "url": "https://www.themoviedb.org/movie/603",
+    "directors": [
+      "Lana Wachowski",
+      "Lilly Wachowski"
+    ],
+    "cast": [
+      "Keanu Reeves",
+      "Laurence Fishburne",
+      "Carrie-Anne Moss",
+      "Hugo Weaving",
+      "Gloria Foster"
+    ]
+  },
+  {
+    "id": 1386216,
+    "title": "The Matrix",
+    "director": "N/A",
+    "year": "2004",
+    "rating": 0.0,
+    "votes": 0,
+    "runtime": 4,
+    "genres": [],
+    "plot": "A large electronics store welcomes vendors and customers. Cameras are there to show that the company’s slogans are not lies. A manipulation transforms the recordings and instils doubt.",
+    "budget": 0,
+    "revenue": 0,
+    "imdb_id": null,
+    "poster": "https://image.tmdb.org/t/p/w500/u9Mt7yFDTEqtZ9R6O5Cu3ECSiBV.jpg",
+    "url": "https://www.themoviedb.org/movie/1386216",
+    "directors": [
+      "Dominic Gagnon"
+    ],
+    "cast": []
+  },
+  {
+    "id": 624860,
+    "title": "The Matrix Resurrections",
+    "director": "N/A",
+    "year": "2021",
+    "rating": 6.359,
+    "votes": 6168,
+    "runtime": 147,
+    "genres": [
+      "Science Fiction",
+      "Action",
+      "Adventure"
+    ],
+    "plot": "Plagued by strange memories, Neo's life takes an unexpected turn when he finds himself back inside the Matrix.",
+    "budget": 190000000,
+    "revenue": 156497322,
+    "imdb_id": "tt10838180",
+    "poster": "https://image.tmdb.org/t/p/w500/8c4a8kE7PizaGQQnditMmI1xbRp.jpg",
+    "url": "https://www.themoviedb.org/movie/624860",
+    "directors": [
+      "Lana Wachowski"
+    ],
+    "cast": [
+      "Keanu Reeves",
+      "Carrie-Anne Moss",
+      "Yahya Abdul-Mateen II",
+      "Jonathan Groff",
+      "Jessica Henwick"
+    ]
+  }
+]
