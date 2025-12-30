@@ -6,7 +6,7 @@ import re
 
 from global_variables import *
 import dialogue_manager
-import dialogue_state_tracker
+from dialogue_state_tracker import DialogueStateTracker
 
 # # we check the intention of the user
 # if OTHER_INTENT in dialogue_state_tracker.dialogueST.get_json():
@@ -15,19 +15,20 @@ import dialogue_state_tracker
 #         system_prompt = "You are a movie expert. A user asked something "
 
 
-# we check the intentions of the user inside the json from the dialogue state tracker and we return the corresponding json to complete
-def extractIntentionsJson(dialogueST: str): # non sono sicuro del tipo di dialogueST
+# We check the intentions of the user inside the json from the dialogue state tracker. 
+# Then we return a corresponding json for each intention to complete 
+def extractIntentions(jsonAnswer: str) -> list[str]:
 
-    intentions_json: str = dialogueST.get_intentions_json() # forse non è una str non sono sicuro
-    json_list: list[str] = []
-    if "create new list" in intentions_json:
-        json_list.append("""{"intent": "create new list", list name": null}""")
-    if "modify existing list" in intentions_json:
-        json_list.append("""{"intent": "modify existing list", list name": null, "action": null, "object_title": null}""")
-    if "information request" in intentions_json:
-        json_list.append("""{"intent": "information request", "object of the information": null, "text of the request": null}""")
-    if "other" in intentions_json:
-        json_list.append("""{"intent": "_other_"}""")
+    intentions: str = jsonAnswer
+    intentions_list_json: list[str] = []
+    if "create new list" in intentions:
+        intentions_list_json.append("""{"intent": "create new list", "list_name": null}""")
+    if "modify existing list" in intentions:
+        intentions_list_json.append("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null}""")
+    if "movie information request" in intentions:
+        intentions_list_json.append("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null}""")
+    if "other" in intentions:
+        intentions_list_json.append("""{"intent": "other", "text_of_the_request": null}""")
     
-    return json_list
+    return intentions_list_json
     

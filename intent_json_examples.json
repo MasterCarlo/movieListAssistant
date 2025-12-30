@@ -1,0 +1,25 @@
+[
+    {
+        "intent": "create new list", 
+        "list_name": null
+    }, 
+    {
+        "intent": "modify existing list", 
+        "list_name": null, 
+        "action": null, // add object, remove object, delete list 
+        "object_title": null
+    },
+    {
+        "intent": "show existing list", 
+        "list_title": null
+    },
+    {
+        "intent": "movie information request",
+        "object_of_the_information": null, 
+        "text_of_the_request": null
+    },
+    {
+        "intent": "other",
+        "text_of_the_request": null
+    }
+]
