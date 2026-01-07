@@ -20,22 +20,20 @@ def followupInteraction(dialogueST: DialogueStateTracker, process: subprocess.Po
     except Exception as e:
         print(f"Error: An unexpected error occurred during printing JSON intentions: {e}")
         exit(1)
+    # We check if there are intentions with no null slots that we can fulfill directly
+    fulfillIntent(dialogueST)
     
-    for intention in dialogueST.get_intentions_json():
-        if None not in intention.values() and intention.get("fulfilled") == False:
-            doAction() # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
-            intention["fulfilled"] = True
     # If there are null slots in the json, we need to fill them. We ask the LLM to do it for us
     if(any(None in intention.values() for intention in dialogueST.get_intentions_json())): # we search for None instead of null because of python json format
         print("There are null slots to fill, we will ask the LLM to fill them.")
         user_response: str | None = fillNullSlots(dialogueST, process)
+        # after filling the null slots we check if there are still null slots
+        fulfillIntent(dialogueST)
         # adesso fai tutte le azioni, poi controlli i nuovi intent e gli aggiungi, poi ritorni al main e si ricomincia da capo
         if user_response:
             new_int_detected: bool = nlu.checkForIntention(dialogueST, user_response)
     else:
         print("No null slots to fill, so the request is satisfied.")
-        for intention in dialogueST.get_intentions_json():
-            doAction() # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
     return
 
 def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen) -> tuple[str, str | None]:
@@ -79,3 +77,12 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     print("Filled JSON received: ", filled_json)
     filled_json_list : list[dict] = utils.stringToJson(filled_json)
     return filled_json_list
+
+def fulfillIntent(dialogueST: DialogueStateTracker):
+    for intention in dialogueST.get_intentions_json():
+        if None not in intention.values() and intention.get("fulfilled") == False:
+            doAction() # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
+            intention["fulfilled"] = True
+    # Remove the fulfilled intentions from the list
+    unfulfilled_intentions: list[dict] = [intent for intent in dialogueST.get_intentions_json() if intent.get("fulfilled") == False]
+    dialogueST.update_intentions_json(unfulfilled_intentions)
