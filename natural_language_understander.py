@@ -18,17 +18,24 @@ from dialogue_state_tracker import DialogueStateTracker
 # We check the intentions of the user inside the json from the dialogue state tracker. 
 # Then we return a corresponding json for each intention to complete 
 def extractIntentions(jsonAnswer: str) -> list[str]:
-
+    
     intentions: str = jsonAnswer
-    intentions_list_json: list[str] = []
+    intentions_list_json: list[dict] = []
     if "create new list" in intentions:
-        intentions_list_json.append("""{"intent": "create new list", "list_name": null, "fulfilled": false}""")
+        intent: dict = json.loads("""{"intent": "create new list", "list_name": null, "fulfilled": false}""")
+        intentions_list_json.append(intent)
     if "modify existing list" in intentions:
-        intentions_list_json.append("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null, "fulfilled": false}""")
+        intent: dict = json.loads("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null, "fulfilled": false}""")
+        intentions_list_json.append(intent)
     if "movie information request" in intentions:
-        intentions_list_json.append("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null, "fulfilled": false}""")
+        intent: dict = json.loads("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null, "fulfilled": false}""")
+        intentions_list_json.append(intent)
     if "other" in intentions:
-        intentions_list_json.append("""{"intent": "other", "text_of_the_request": null, "fulfilled": false}""")
+        intent: dict = json.loads("""{"intent": "other", "text_of_the_request": null, "fulfilled": false}""")
+        intentions_list_json.append(intent)
     
     return intentions_list_json
-    
+
+
+def checkForIntention(dialogueST: DialogueStateTracker, userResponse: str) -> bool:
+    pass

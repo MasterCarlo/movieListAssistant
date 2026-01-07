@@ -6,8 +6,10 @@ from dialogue_state_tracker import DialogueStateTracker
 # We generate a question to ask the user to fill the null slots in the json intentions.
 # filled_json is the json with the intentions filled as much as possible with previous information, 
 # but it still has null slots
-def generate_question(dialogueST: DialogueStateTracker, last_N_turns: str, filled_json: str) -> str:
+def generate_question(dialogueST: DialogueStateTracker, filled_json: str) -> str:
     
+    last_N_turns: list[str] = dialogueST.get_last_N_turns()
+    last_N_turns: str = "  ".join(last_N_turns)
     instruction: str = "You are a movie list assistant and movie expert, you can help the user only modifying an existing list, creating a new list or answering to his movie information requests."
     for intention in dialogueST.get_intentions_json():
         if CREATE_NEW_LIST_INTENT in intention:

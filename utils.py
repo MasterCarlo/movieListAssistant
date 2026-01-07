@@ -86,7 +86,7 @@ def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
     
     return answer
 
-# we transform the dictionary json into a string with null instead of None
+# Transform the list of dictionary json into a string with null instead of None
 def jsonToString(json_list: list[dict]) -> str:
     json_str: list[str] = []
     for json_file in json_list: 
@@ -94,3 +94,16 @@ def jsonToString(json_list: list[dict]) -> str:
         json_str.append(value)
     json_str: str = " ".join(json_str) # we create a unique json string
     return json_str
+
+# Transform a json string into a list of dict with None instead of null
+def stringToJson(json_string: str) -> list[dict]:
+    json_list: list[dict] = []
+    json_string = json_string.strip()
+    if json_string.startswith('[') and json_string.endswith(']'):
+        try:
+            json_list = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON string: {e}")
+    else:
+        print("The provided string is not a valid JSON array.")
+    return json_list
