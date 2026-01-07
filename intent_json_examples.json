@@ -1,25 +1,30 @@
 [
     {
         "intent": "create new list", 
-        "list_name": null
+        "list_name": null,
+        "fulfilled": false
     }, 
     {
         "intent": "modify existing list", 
-        "list_name": null, 
-        "action": null, 
-        "object_title": null
+        "list_name": null,
+        "action": null,
+        "object_title": null,
+        "fulfilled": false
     },
     {
         "intent": "show existing list", 
-        "list_title": null
+        "list_title": null,
+        "fulfilled": false
     },
     {
         "intent": "movie information request",
         "object_of_the_information": null, 
-        "text_of_the_request": null
+        "text_of_the_request": null,
+        "fulfilled": false
     },
     {
         "intent": "other",
-        "text_of_the_request": null
+        "text_of_the_request": null,
+        "fulfilled": false
     }
 ]

@@ -22,13 +22,13 @@ def extractIntentions(jsonAnswer: str) -> list[str]:
     intentions: str = jsonAnswer
     intentions_list_json: list[str] = []
     if "create new list" in intentions:
-        intentions_list_json.append("""{"intent": "create new list", "list_name": null}""")
+        intentions_list_json.append("""{"intent": "create new list", "list_name": null, "fulfilled": false}""")
     if "modify existing list" in intentions:
-        intentions_list_json.append("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null}""")
+        intentions_list_json.append("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null, "fulfilled": false}""")
     if "movie information request" in intentions:
-        intentions_list_json.append("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null}""")
+        intentions_list_json.append("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null, "fulfilled": false}""")
     if "other" in intentions:
-        intentions_list_json.append("""{"intent": "other", "text_of_the_request": null}""")
+        intentions_list_json.append("""{"intent": "other", "text_of_the_request": null, "fulfilled": false}""")
     
     return intentions_list_json
     

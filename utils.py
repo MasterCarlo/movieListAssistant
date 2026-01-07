@@ -4,6 +4,8 @@ import re
 import subprocess
 import time
 
+from dialogue_state_tracker import DialogueStateTracker
+
 # def marzolaJsonExtraction():
 #     # We are waiting for the json part to be written by llama2
 #     content = ""
@@ -83,4 +85,12 @@ def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
     answer = "".join(answer)
     
     return answer
-    
+
+# we transform the dictionary json into a string with null instead of None
+def jsonToString(json_list: list[dict]) -> str:
+    json_str: list[str] = []
+    for json_file in json_list: 
+        value: str = json.dumps(json_file)
+        json_str.append(value)
+    json_str: str = " ".join(json_str) # we create a unique json string
+    return json_str
