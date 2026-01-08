@@ -31,7 +31,7 @@ def followupInteraction(dialogueST: DialogueStateTracker, process: subprocess.Po
         fulfillIntent(dialogueST)
         # adesso fai tutte le azioni, poi controlli i nuovi intent e gli aggiungi, poi ritorni al main e si ricomincia da capo
         if user_response:
-            new_int_detected: bool = nlu.checkForIntention(dialogueST, user_response)
+            bool = nlu.checkForIntention(dialogueST)
     else:
         print("No null slots to fill, so the request is satisfied.")
     return
@@ -46,8 +46,8 @@ def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen) -
         print("There are still null slots to fill, we will ask the user for more information.")
         instruction = nlg.generate_question(dialogueST, filled_json)
         userResponse: str = askUser(process, instruction)
-        dialogueST.add_last_user_input(userResponse)
-        dialogueST.update_turns(userResponse)
+        dialogueST.update_last_user_input(userResponse)
+        dialogueST.add_turn(userResponse)
         print("User response received: ", userResponse)
         # Now the user answer is part of our current info
         filled_json = fillWithCurrentInfo(process, dialogueST)

@@ -1,5 +1,5 @@
 CREATE_NEW_LIST_INTENT: str = "create new list"
-MOVIE_INFO_REQUEST_INTENT: str = "movie information request"
-MODIFY_LIST_INTENT: str = "modify existing list"
+MOVIE_INFORMATION_REQUEST_INTENT: str = "movie information request"
+MODIFY_EXISTING_LIST_INTENT: str = "modify existing list"
 SHOW_EXISTING_LIST_INTENT: str = "show existing list"
 OTHER_INTENT: str = "other"
