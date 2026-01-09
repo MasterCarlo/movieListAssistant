@@ -23,19 +23,19 @@ def extractIntentions(json_answer: str) -> list[str]:
         intentions: str = json_answer
         intentions_list_json: list[dict] = []
         if CREATE_NEW_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent": "create new list", "list_name": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + CREATE_NEW_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
             intentions_list_json.append(intent)
         if MODIFY_EXISTING_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent": "modify existing list", "list_name": null, "action": null, "object_title": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + MODIFY_EXISTING_LIST_INTENT + """\", "list_name": null, "action": null, "object_title": null, "fulfilled": false}""")
             intentions_list_json.append(intent)
         if SHOW_EXISTING_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent": "show existing list", "list_name": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + SHOW_EXISTING_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
             intentions_list_json.append(intent)
         if MOVIE_INFORMATION_REQUEST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent": "movie information request", "object_of_the_information": null, "text_of_the_request": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + MOVIE_INFORMATION_REQUEST_INTENT + """\", "object_title": null, "information_requested": [null], "fulfilled": false}""")
             intentions_list_json.append(intent)
         if OTHER_INTENT in intentions:
-            intent: dict = json.loads("""{"intent": "other", "text_of_the_request": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + OTHER_INTENT + """\", "text_of_the_request": null, "fulfilled": false}""")
             intentions_list_json.append(intent)
         
         return intentions_list_json

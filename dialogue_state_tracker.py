@@ -5,7 +5,7 @@ N: int = 12 # number of turns to keep in memory
 class DialogueStateTracker:
     def __init__(self):
         self.last_user_input: str = "" # here we store the last user input
-        self.intentions_json: list[dict] = None # here we store the json file with the intentions of the user. They can be uncomplete (null slots) 
+        self.intentions_json: list[dict] = [] # here we store the json file with the intentions of the user. They can be uncomplete (null slots) 
         self.last_N_turns: list[str] = [] # here we store the last N turns of the dialogue for context memory
     
     def update_last_user_input(self, user_input: str):

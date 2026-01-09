@@ -1,6 +1,5 @@
 """
 TMDb (The Movie Database) API Script
-Free alternative when IMDb is not accessible
 
 Get your free API key from: https://www.themoviedb.org/settings/api
 (Create account -> Settings -> API -> Request API Key -> Developer)
@@ -98,6 +97,87 @@ class MovieDatabase:
             import traceback
             traceback.print_exc()
             return []
+    
+    def search_titles(self, query, num_results=5):
+        """
+        Search for movies and TV series by title
+        """
+        print(f"\n=== Searching for movies & TV series: {query} ===\n")
+
+        try:
+            url = f"{self.base_url}/search/multi"
+            params = {
+                'api_key': self.api_key,
+                'query': query,
+                'language': 'en-US'
+            }
+
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+
+            data = response.json()
+            results = data.get('results', [])
+
+            print(f"Found {len(results)} results\n")
+
+            output = []
+
+            for item in results[:num_results]:
+                media_type = item.get('media_type')
+
+                if media_type == "movie":
+                    details = self._get_movie_details(item['id'])
+                    if not details:
+                        continue
+
+                    info = {
+                        'type': 'movie',
+                        'id': item['id'],
+                        'title': details.get('title', 'N/A'),
+                        'year': details.get('release_date', 'N/A')[:4] if details.get('release_date') else 'N/A',
+                        'rating': details.get('vote_average', 'N/A'),
+                        'votes': details.get('vote_count', 0),
+                        'runtime': details.get('runtime', 'N/A'),
+                        'genres': [g['name'] for g in details.get('genres', [])],
+                        'plot': details.get('overview', 'N/A'),
+                        'budget': details.get('budget', 0),
+                        'revenue': details.get('revenue', 0),
+                        'imdb_id': details.get('imdb_id', 'N/A'),
+                        'poster': f"https://image.tmdb.org/t/p/w500{details['poster_path']}" if details.get('poster_path') else 'N/A',
+                        'url': f"https://www.themoviedb.org/movie/{item['id']}"
+                    }
+
+                elif media_type == "tv":
+                    details = self._get_tv_details(item['id'])
+                    if not details:
+                        continue
+
+                    info = {
+                        'type': 'tv',
+                        'id': item['id'],
+                        'title': details.get('name'),
+                        'year': details.get('first_air_date', 'N/A')[:4],
+                        'rating': details.get('vote_average'),
+                        'seasons': details.get('number_of_seasons'),
+                        'episodes': details.get('number_of_episodes'),
+                        'genres': [g['name'] for g in details.get('genres', [])],
+                        'plot': details.get('overview'),
+                        'url': f"https://www.themoviedb.org/tv/{item['id']}"
+                    }
+
+                else:
+                    continue
+
+                output.append(info)
+
+                self._print_media_info(info)
+
+            return output
+
+        except Exception as e:
+            print(f"ERROR: {e}")
+            return []
+
     
     def get_popular_movies(self, num_movies=10):
         """
@@ -225,6 +305,20 @@ class MovieDatabase:
         except:
             return None
     
+    def _get_tv_details(self, tv_id):
+        """Get detailed information for a TV series"""
+        try:
+            url = f"{self.base_url}/tv/{tv_id}"
+            params = {'api_key': self.api_key, 'language': 'en-US'}
+
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+
+            return response.json()
+        except:
+            return None
+
+    
     def _print_movie_info(self, movie_info):
         """Print formatted movie information"""
         print(f"Title: {movie_info['title']} ({movie_info['year']})")
@@ -247,6 +341,50 @@ class MovieDatabase:
         
         print(f"TMDb URL: {movie_info['url']}")
         print("=" * 80)
+    
+    def _print_media_info(self, media_info):
+        """Print formatted movie or TV series information"""
+
+        media_type = media_info.get("type", "movie")
+
+        print(f"Title: {media_info['title']} ({media_info['year']})")
+        print(f"Type: {media_type.upper()}")
+        print(f"Rating: {media_info['rating']}/10")
+
+        # ---- Movie-specific fields ----
+        if media_type == "movie":
+            if media_info.get("votes") is not None:
+                print(f"Votes: {media_info['votes']:,}")
+
+            if media_info.get("runtime") not in (None, 'N/A'):
+                print(f"Runtime: {media_info['runtime']} minutes")
+
+            if media_info.get("directors"):
+                print(f"Directors: {', '.join(media_info['directors'])}")
+
+        # ---- TV-specific fields ----
+        elif media_type == "tv":
+            if media_info.get("seasons") is not None:
+                print(f"Seasons: {media_info['seasons']}")
+
+            if media_info.get("episodes") is not None:
+                print(f"Episodes: {media_info['episodes']}")
+
+        # ---- Shared fields ----
+        if media_info.get("cast"):
+            print(f"Top Cast: {', '.join(media_info['cast'])}")
+
+        if media_info.get("genres"):
+            print(f"Genres: {', '.join(media_info['genres'])}")
+
+        print(f"Plot: {media_info['plot']}")
+
+        if media_info.get("imdb_id"):
+            print(f"IMDb: https://www.imdb.com/title/{media_info['imdb_id']}/")
+
+        print(f"TMDb URL: {media_info['url']}")
+        print("=" * 80)
+
 
 
 # Example usage
@@ -285,3 +423,5 @@ if __name__ == "__main__":
         with open('movie_results.json', 'w', encoding='utf-8') as f:
             json.dump(movies, f, indent=2, ensure_ascii=False)
         print("\n✅ Results saved to 'movie_results.json'")
+    
+    print("trallero trallalla")

@@ -1,4 +1,8 @@
 import json
+import tmdb_api
+
+from global_variables import *
+
 
 # #Open the file and read the JSON content
 # try:
@@ -37,6 +41,13 @@ import json
 # else:
 #     print("All slots are filled in the intent JSON examples.")
 
+# ================================================================================================
+
+intent: dict = json.loads("""{"intent": "show existing list", "list_name": null, "fulfilled": false}""")
+intent2: dict = json.loads("""{"intent":""" + """\"""" + SHOW_EXISTING_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
+print("Intent 1:", intent)
+print("Intent 2:", intent2)
+
 # string: str =     """{
 #         "intent": "other",
 #         "text_of_the_request": "Find me movies with time travel themes."
@@ -51,12 +62,28 @@ import json
 # nome = input()
 # print("il tuo nome è:", nome)
 
+# ================================================================================================
+
 # string: str = """[]"""
 # print(len(string))
 
-onelist = [1,2,3,4]
-anotherlist = [5,6,7]
-# onelist.extend(anotherlist)
-anotherlist.extend(onelist)
-print(anotherlist)
+# ================================================================================================
+
+# API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
+# db = tmdb_api.MovieDatabase(API_KEY)
+# movies = db.search_titles("Breaking Bad", num_results=5)
+# for movie in movies:
+#     print(type(movie))
+
+# ================================================================================================
+
+# dictionary = {
+#     "Inception": {"year": 2010, "rate": 8.8},
+#     "Interstellar": {"year": 2014, "rate": 8.6}
+# }
+
+# dictionary["Inception"]["director"] = "Christopher Nolan"
+
+# print(dictionary)
+
 

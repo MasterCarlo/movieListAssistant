@@ -10,20 +10,20 @@ def generate_question(dialogueST: DialogueStateTracker, filled_json: str) -> str
     
     last_N_turns: list[str] = dialogueST.get_last_N_turns()
     last_N_turns: str = "  ".join(last_N_turns)
-    instruction: str = "You are a movie list assistant and movie expert, you can help the user only modifying an existing list, creating a new list or answering to his movie information requests."
+    instruction: str = "You are a movie list assistant and movie expert, you can help the user only" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "."
     for intention in dialogueST.get_intentions_json():
         if CREATE_NEW_LIST_INTENT in intention:
             if "null" in intention:
                 # ask for the name of the new list
                 instruction= instruction + "The user wants to create a new movie list but hasn't specified the name of the list. Please ask the user for the name of the new list or suggest a name for the list based on the previous conversation if possible."
-        elif MODIFY_LIST_INTENT in intention:
+        elif MODIFY_EXISTING_LIST_INTENT in intention:
             if "null" in intention:
                 # ask for the name of the list to modify, the action and the object title
-                instruction= instruction + "The user wants to modify an existing movie list but hasn't specified the name of the list, the action to perform (only actions possible: \"add object\", \"remove object\", \"delete list\") and/or the title of the object (a movie or a series). Please ask the user for these details or suggest them based on the previous conversation if possible."
-        elif MOVIE_INFO_REQUEST_INTENT in intention:
+                instruction= instruction + f"The user wants to modify an existing movie list but hasn't specified the name of the list, the action to perform (only actions possible: {MODIFY_LIST_ACTIONS}) and/or the title of the object (a movie or a series or the new name of a list). Please ask the user for these details or suggest them based on the previous conversation if possible."
+        elif MOVIE_INFORMATION_REQUEST_INTENT in intention:
             if "null" in intention:
                 # ask for the object of the information and the text of the request
-                instruction= instruction + "The user has requested movie information but hasn't specified the object of the information (a movie or a series) and/or the text of the request. Please ask the user for these details or suggest them based on the previous conversation if possible."
+                instruction= instruction + f"The user has requested movie or series information but hasn't specified the object of the information (a movie or a series) and/or the specific information requested (possible options: {MOVIE_INFO_ACTIONS}). Please ask the user for these details or suggest them based on the previous conversation if possible."
         elif SHOW_EXISTING_LIST_INTENT in intention:
             if "null" in intention:
                 # ask for the name of the list to show
@@ -36,7 +36,7 @@ def generate_question(dialogueST: DialogueStateTracker, filled_json: str) -> str
                 request: str = "The text of the request is " + data[OTHER_INTENT]["request"]
             else:
                 print("The other intent text of the request is empty.")
-            instruction = instruction + "The user has made a request that exceeds your expertise. Please politely inform the user that you are unable to assist with that particular request." + request + ". Then, remind the user that you can help him with modifying an existing list, creating a new list or answering to his movie information requests." 
+            instruction = instruction + "The user has made a request that exceeds your expertise. Please politely inform the user that you are unable to assist with that particular request." + request + ". Then, remind the user that you can help him with" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "." 
     
     instruction = instruction + "This is the content of your previous conversation with the user: " + last_N_turns + "  This is the json file you are trying to fill: " + filled_json + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
     return instruction

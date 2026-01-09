@@ -2,10 +2,9 @@
   {
     "id": 603,
     "title": "The Matrix",
-    "director": "N/A",
     "year": "1999",
-    "rating": 8.235,
-    "votes": 26970,
+    "rating": 8.2,
+    "votes": 27194,
     "runtime": 136,
     "genres": [
       "Action",
@@ -32,7 +31,6 @@
   {
     "id": 1386216,
     "title": "The Matrix",
-    "director": "N/A",
     "year": "2004",
     "rating": 0.0,
     "votes": 0,
@@ -52,10 +50,9 @@
   {
     "id": 624860,
     "title": "The Matrix Resurrections",
-    "director": "N/A",
     "year": "2021",
-    "rating": 6.359,
-    "votes": 6168,
+    "rating": 6.353,
+    "votes": 6234,
     "runtime": 147,
     "genres": [
       "Science Fiction",

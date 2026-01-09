@@ -7,7 +7,7 @@
     {
         "intent": "modify existing list", 
         "list_name": null,
-        "action": null,
+        "action": ["add object", "remove object", "change title", "delete list"],
         "object_title": null,
         "fulfilled": false
     },
@@ -17,9 +17,9 @@
         "fulfilled": false
     },
     {
-        "intent": "movie information request",
-        "object_of_the_information": null, 
-        "text_of_the_request": null,
+        "intent": "movie or series information request",
+        "object_title": null,
+        "information_requested": ["get cast", "get director", "get year", "get genre", "get ratings"],
         "fulfilled": false
     },
     {
