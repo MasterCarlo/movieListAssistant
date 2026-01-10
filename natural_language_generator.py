@@ -4,13 +4,18 @@ from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
 
 # We generate a question to ask the user to fill the null slots in the json intentions.
-# filled_json is the json with the intentions filled as much as possible with previous information, 
+# json_to_fill is the json with the intentions filled as much as possible with previous information, 
 # but it still has null slots
-def generate_question(dialogueST: DialogueStateTracker, filled_json: str) -> str:
+def generateLLMAnswer(dialogueST: DialogueStateTracker) -> tuple[str, bool]:
     
+    action_performed: str = ""
+    if dialogueST.get_action_performed() != "":
+        action_performed = "This are the actions executed by you so far, on user request: " + dialogueST.get_action_performed() + ". Inform the user that these actions have been performed."
+    other: bool = False
+    json_to_fill: str = json.dumps(dialogueST.get_intentions_json())
     last_N_turns: list[str] = dialogueST.get_last_N_turns()
     last_N_turns: str = "  ".join(last_N_turns)
-    instruction: str = "You are a movie list assistant and movie expert, you can help the user only" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "."
+    instruction: str = "You are a movie list assistant and movie expert, you can help the user only" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "." + action_performed
     for intention in dialogueST.get_intentions_json():
         if CREATE_NEW_LIST_INTENT in intention:
             if "null" in intention:
@@ -28,15 +33,16 @@ def generate_question(dialogueST: DialogueStateTracker, filled_json: str) -> str
             if "null" in intention:
                 # ask for the name of the list to show
                 instruction= instruction + "The user wants to see an existing movie list but hasn't specified the name of the list. Please ask the user for the name of the list or suggest a name for the list based on the previous conversation if possible."
-        elif OTHER_INTENT in intention:
+        elif OTHER_INTENT in intention: # This is part of our fallback policy
             # we can't manage this intent
             request: str = ""
             if not "null" in intention:
+                other = True # we will return this information to the dialogue manager to handle fallback policy
                 data: dict = json.loads(intention)
                 request: str = "The text of the request is " + data[OTHER_INTENT]["request"]
             else:
                 print("The other intent text of the request is empty.")
             instruction = instruction + "The user has made a request that exceeds your expertise. Please politely inform the user that you are unable to assist with that particular request." + request + ". Then, remind the user that you can help him with" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "." 
     
-    instruction = instruction + "This is the content of your previous conversation with the user: " + last_N_turns + "  This is the json file you are trying to fill: " + filled_json + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
-    return instruction
+    instruction = instruction + "This is the content of your previous conversation with the user: " + last_N_turns + "  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
+    return instruction, other

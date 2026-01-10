@@ -43,10 +43,12 @@ from global_variables import *
 
 # ================================================================================================
 
-intent: dict = json.loads("""{"intent": "show existing list", "list_name": null, "fulfilled": false}""")
-intent2: dict = json.loads("""{"intent":""" + """\"""" + SHOW_EXISTING_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
-print("Intent 1:", intent)
-print("Intent 2:", intent2)
+# intent: dict = json.loads("""{"intent": "show existing list", "list_name": null, "fulfilled": false}""")
+# intent2: dict = json.loads("""{"intent":""" + """\"""" + SHOW_EXISTING_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
+# print("Intent 1:", intent)
+# print("Intent 2:", intent2)
+
+# ================================================================================================
 
 # string: str =     """{
 #         "intent": "other",
@@ -86,4 +88,10 @@ print("Intent 2:", intent2)
 
 # print(dictionary)
 
+# ================================================================================================
 
+# string: str = None
+# string = string + "mi piace la pizza trallalero trallalla"
+# print(string)
+
+# ================================================================================================

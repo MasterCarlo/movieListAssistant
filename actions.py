@@ -2,33 +2,40 @@
 # and the calls to tmdb API
 
 import tmdb_api
+import utils
 
 from global_variables import *
 from list_database import ListDatabase
+from dialogue_state_tracker import DialogueStateTracker
 
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
 
-
-def execute(intention: dict, list_db: ListDatabase):
-    intent_type = intention.get("intent")
+# Execute one single action for one single intention
+def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
     
+    action_performed: str = ""
+    intent_type = intention.get("intent")
     if intent_type == CREATE_NEW_LIST_INTENT:
-        createNewList(intention, list_db)
+        action_performed = createNewList(intention, list_db)
     elif intent_type == MODIFY_EXISTING_LIST_INTENT:
-        modifyList(intention, list_db)
+        action_performed = modifyList(intention, list_db)
     elif intent_type == MOVIE_INFORMATION_REQUEST_INTENT:
-        provideInfo(intention, list_db)
+        action_performed =  provideInfo(intention, list_db)
     elif intent_type == SHOW_EXISTING_LIST_INTENT:
-        showExistingList(intention, list_db)
+        action_performed = showExistingList(intention, list_db)
     elif intent_type == OTHER_INTENT:
-        handleOtherIntent(intention, list_db)
+        action_performed = fallbackPolicy(intention, list_db)
     else:
         print("Unknown intent type:", intent_type)
+    
+    return action_performed
 
 # TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
 # prima bisogna creare la lista e poi aggiungere il film (che va su modify list come intention)
-def createNewList(intention: dict, list_db: ListDatabase):
+def createNewList(intention: dict, list_db: ListDatabase) -> str:
+    
+    
     list_name: str = intention.get("list_name")
     if list_name not in list_db.lists:
         list_db.lists[list_name] = {}
@@ -41,8 +48,13 @@ def createNewList(intention: dict, list_db: ListDatabase):
             print(f"Overwritten existing list '{list_name}'.")
         else:
             print(f"Did not overwrite existing list '{list_name}'.")
+    
+    action_performed: str = f"{CREATE_NEW_LIST_INTENT} with list name '{list_name}'. "
+    return action_performed
 
-def modifyList(intention: dict, list_db: ListDatabase):
+
+def modifyList(intention: dict, list_db: ListDatabase) -> str:
+    
     list_name: str = intention.get("list_name")
     action: str = intention.get("action")
     object_title: str = intention.get("object_title")
@@ -72,8 +84,12 @@ def modifyList(intention: dict, list_db: ListDatabase):
             print(f"List '{list_name}' does not exist.")
     else:
         print(f"Unknown action '{action}' for modifying list.") 
+    
+    action_performed: str = f"{MODIFY_EXISTING_LIST_INTENT} with action '{action}' on list '{list_name}' and object title '{object_title}'. "
+    return action_performed
 
-def provideInfo(intention: dict, list_db: ListDatabase):
+def provideInfo(intention: dict, list_db: ListDatabase) -> str:
+    
     object_title: str = intention.get("object_title")
     information_requested: list[str] = intention.get("information_requested")
     
@@ -120,8 +136,11 @@ def provideInfo(intention: dict, list_db: ListDatabase):
         else:
             print(f"Unknown information requested: '{info}'")
     
+    action_performed: str = f"{MOVIE_INFORMATION_REQUEST_INTENT} for object title '{object_title}' with requested information {information_requested}. "
+    return action_performed
 
-def showExistingList(intention: dict, list_db: ListDatabase):
+def showExistingList(intention: dict, list_db: ListDatabase) -> str:
+    
     list_name: str = intention.get("list_name")
     movie_list: dict = list_db.get_list(list_name)
     if movie_list is not None:
@@ -130,8 +149,14 @@ def showExistingList(intention: dict, list_db: ListDatabase):
             print(f"- {title}: {details}")
     else:
         print(f"List '{list_name}' does not exist.")
+    
+    action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'. "
+    return action_performed
 
-def handleOtherIntent(intention: dict, list_db: ListDatabase):
-    request_text: str = intention.get("text_of_the_request")
-    print(f"Handling other intent with request: {request_text}")
-    print("Sorry, I am unable to assist with that particular request.")
+# TODO: dopo aver eseguito ogni azione bisogna informare l'utente quindi chiamare l'llm
+def fallbackPolicy(intention: dict, list_db: ListDatabase) -> str:
+    
+    request: str = "The text of the request is " + intention.get("text_of_the_request")
+    print(f"Handling other intent with request: {request}")
+    instruction: str = "The user also has made a request that exceeds your expertise. Please politely inform the user that you are unable to assist with that particular request." + request + ". Then, remind the user that you can help him with" + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + "." 
+    return instruction
