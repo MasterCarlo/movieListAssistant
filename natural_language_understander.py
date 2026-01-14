@@ -15,10 +15,14 @@ from dialogue_state_tracker import DialogueStateTracker
 #         #the user expressed at least one legitimate intention and a non legitimate one
 #         system_prompt = "You are a movie expert. A user asked something "
 
+# TODO: testare col debug le funzioni modify list e get movie information
 
 # We check the intentions of the user inside the json from the dialogue state tracker. 
 # Then we return a corresponding json for each intention to complete 
-def extractIntentions(json_answer: str) -> list[str]:
+def extractIntentions(json_answer: str) -> list[dict]:
+    if DEBUG:
+        print("Debug mode in extractIntentions")
+        print("JSON answer to extract intentions from:", json_answer)
     if len(json_answer) > 3: # if it's not an empty json list "[]"
         intentions: str = json_answer
         intentions_list_json: list[dict] = []

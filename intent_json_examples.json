@@ -24,7 +24,7 @@
     },
     {
         "intent": "other",
-        "text_of_the_request": null,
+        "request": null,
         "fulfilled": false
     }
 ]

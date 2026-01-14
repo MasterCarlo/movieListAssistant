@@ -5,6 +5,7 @@ import subprocess
 import time
 
 from dialogue_state_tracker import DialogueStateTracker
+from global_variables import *
 
 # def marzolaJsonExtraction():
 #     # We are waiting for the json part to be written by llama2
@@ -50,6 +51,10 @@ from dialogue_state_tracker import DialogueStateTracker
 #     return parsed_json
 
 def startLLM() -> subprocess.Popen:
+    
+    if DEBUG:
+        print("Debug mode is ON: LLM process will not be started.")
+        return None  
     try: 
         command: list[str] = ["python", "-m", "main"]
         project_root: str = os.path.abspath("../HMD-Lab")
@@ -67,8 +72,12 @@ def startLLM() -> subprocess.Popen:
 
 
 def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
-
-    print("Asking LLM...")
+    
+    if DEBUG:
+        print("Debug mode in askAndReadAnswer")
+        print("Instruction sent to LLM:", instruction)
+        answer: str = input("LLM: ")
+        return answer
     # We instruct the LLM with the instruction + user input
     process.stdin.write(instruction + "\n")
     process.stdin.flush()

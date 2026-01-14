@@ -1,0 +1,10 @@
+LLM: ciao coglione
+User: ciao, voglio una pizza, sapere il coglione che ha diretto quel film, e stampare la lista dei film visti
+Debug mode in askAndReadAnswer
+Instruction sent to LLM: You are a movie expert. From the user input, I want you to extract the intentions of the user, they can be: [create new list], [modify existing list], [show existing list], [movie or series information request], [other]. Your answer must be ONLY a json format with ONLY the intentions. There can be one intention or more per user input, and the intentions can be different or the same with different data, if so, print multiple json objects inside a list, always in JSON format. For example: [{"intention": "movie information request"}, {"intention": "modify existing list"}, {"intention": "modify existing list"}]. Here is the user input:ciao, voglio una pizza, sapere il coglione che ha diretto quel film, e stampare la lista dei film visti
+LLM: [{"intention": "movie or series information request"}, {"intention": "show existing list"}, {"intention": "other"}]            
+
+
+[{"intent": "show existing list", "list_name": "visti","fulfilled": false},{"intent": "movie or series information request","object_title": null,"information_requested": [null], "fulfilled": false  },  {  "intent": "other", "text_of_the_request": "voglio mangiare una pizza","fulfilled": false}]
+
+[{"intent": "movie or series information request","object_title": "Avatar","information_requested": ["get director"], "fulfilled": false  }]

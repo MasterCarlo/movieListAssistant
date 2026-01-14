@@ -4,11 +4,14 @@ import subprocess
 
 from dialogue_state_tracker import DialogueStateTracker
 from list_database import ListDatabase
+from global_variables import *
 
-
+# TODO: gestire uscita dal programma e gestire memoria a lungo termine, se sepngo e riaccendo voglio avere le stesse liste
 dialogueST: DialogueStateTracker = DialogueStateTracker()
 list_db: ListDatabase = ListDatabase()
 process: subprocess.Popen = first_interaction.runFirstInteraction(dialogueST)
 
 while True:
-    dialogue_manager.followupInteraction(dialogueST, list_db,process)
+    if DEBUG:
+        print("----- New follow-up interaction -----")
+    dialogue_manager.followupInteraction(dialogueST, list_db, process)
