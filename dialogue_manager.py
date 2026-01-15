@@ -18,8 +18,8 @@ from global_variables import *
 # to the the user), then we generate an appropriate response
 def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase, process: subprocess.Popen):
 
-    if DEBUG:
-        print("JSON intentions in followupInteraction:", dialogueST.get_intentions_json())
+    if DEBUG or DEBUG_LLM:
+        print("JSON intentions in followupInteraction")
     # First we fill the intentions json with our current info
     filled_json: list[dict] = fillWithCurrentInfo(process, dialogueST)
     dialogueST.update_intentions(filled_json)
@@ -46,28 +46,30 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
         else:
             print("No null slots to fill")
     else: # All intentions have been fulfilled
-        print("All intentions have been fulfilled.")
+        if DEBUG or DEBUG_LLM:
+            print("All intentions have been fulfilled.")
         instruction: str = nlg.communicateCompletion(dialogueST, other_request)
         dialogueST.clear_actions() # we clear the actions performed for the next interactions
         llmAnswer: str = utils.askAndReadAnswer(process, instruction) # we tell the LLM to inform the user that all his requests have been satisfied
-        print("LLM informs the user:", llmAnswer)
-        dialogueST.add_turn("LLM: " + llmAnswer)
+        if DEBUG or DEBUG_LLM:
+            print("LLM informs the user:", llmAnswer)
+        dialogueST.add_turn("Movie Assistant: " + llmAnswer)
     return
 
 def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, other_request: str) -> str | None:
 
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in fillNullSlots.")
     # Check if there are still null slots
     if (any(None in intention.values() for intention in dialogueST.get_intentions_json())):
         userResponse: str = ""
         userResponse = askUser(process, dialogueST, other_request)
-        if DEBUG:
+        if DEBUG or DEBUG_LLM:
             print("User response received in fillNullSlots: ", userResponse)
         # Now the user answer is part of our current info
         filled_json = fillWithCurrentInfo(process, dialogueST)
         dialogueST.update_intentions(filled_json)
-        if DEBUG:
+        if DEBUG or DEBUG_LLM:
             print("Filled JSON after asking user in fillNullSlots: ", filled_json)
         return userResponse
     else:
@@ -76,7 +78,7 @@ def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, o
 
 def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, other_request: str) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in askUser")
     instruction: str = ""
     # We generate the question for the user for more information. Inside the question there is also the 
@@ -88,16 +90,17 @@ def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, other_r
     for intention in dialogueST.get_intentions_json(): #it's for safety, should be already fulfilled
         if intention.get("intent") == OTHER_INTENT:
             intention["fulfilled"] = True
-    dialogueST.add_turn("LLM: " + llmAnswer)
-    print("LLM asks the user:", llmAnswer)
+    dialogueST.add_turn("Movie Assistant: " + llmAnswer)
+    if DEBUG or DEBUG_LLM:
+        print("LLM asks the user:", llmAnswer)
     userInput: str = input()
     dialogueST.update_last_user_input(userInput)
-    dialogueST.add_turn(userInput)
+    dialogueST.add_turn("User: " + userInput)
     return userInput
 
 def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTracker) -> list[dict]:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in fillWithCurrentInfo.")
     # Load the last N turns of the conversation from the dialogue state tracker
     last_N_turns: list[str] = dialogueST.get_last_N_turns()
@@ -105,7 +108,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     json_to_fill: str = json.dumps(dialogueST.get_intentions_json(), indent=2) # TODO: In caso non funzionasse c'è la funzione jsonToString in utils.py che trasforma una lista di dict in una stringa json
     instruction: str = f"""You are a movie list assistant and movie expert, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. This is the content of your previous conversation with the user: {last_N_turns}. Use the content of that conversation to fill the null slots inside this json: {json_to_fill}. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only actions possible: {MOVIE_INFO_ACTIONS}. Be aware of typing errors of the user.If you don't find the information to fill a slot, leave it as null. Print ONLY the same JSON string, but with the nulls that you can fill, filled, in a JSON format and NOTHING ELSE after."""
     filled_json: str = utils.askAndReadAnswer(process, instruction)
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("Filled JSON received in fillWithCurrentInfo: ", filled_json)
     filled_json_list : list[dict] = utils.stringToJson(filled_json)
     dialogueST.update_intentions(filled_json_list)
@@ -114,7 +117,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
 # If there are intentions with no null slots, we fulfill them directly
 def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tuple[str, str]:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in fulfillIntent.")
     other_request: str = "" # This is needed ONLY to create the answer for the fallback policy
     actions_performed: str = "" # A written report of what action the LLM has completed

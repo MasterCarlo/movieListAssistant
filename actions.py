@@ -11,10 +11,11 @@ from dialogue_state_tracker import DialogueStateTracker
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
 
+# TODO: fare l'azione di consiglia film
 # Execute one single action for one single intention
 def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.execute")
         print("Executing intention:", intention)
     action_performed: str = ""
@@ -38,7 +39,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
 # prima bisogna creare la lista e poi aggiungere il film (che va su modify list come intention)
 def createNewList(intention: dict, list_db: ListDatabase) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.createNewList")
     
     list_name: str = intention.get("list_name")
@@ -64,8 +65,9 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
     action: str = intention.get("action")
     object_title: str = intention.get("object_title")
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.modifyList")
+    if DEBUG:
         action_performed: str = f"{MODIFY_EXISTING_LIST_INTENT} with action '{action}' on list '{list_name}' and object title '{object_title}'"
         return action_performed
     
@@ -100,7 +102,7 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
 
 def provideInfo(intention: dict, list_db: ListDatabase) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.provideInfo")
     
     object_title: str = intention.get("object_title")
@@ -178,9 +180,9 @@ def provideInfo(intention: dict, list_db: ListDatabase) -> str:
 def showExistingList(intention: dict, list_db: ListDatabase) -> str:
     
     list_name: str = intention.get("list_name")
-    
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.showExistingList")
+    if DEBUG:
         print("lista stampata e va bene così")
         action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'"
         return action_performed
@@ -199,8 +201,9 @@ def showExistingList(intention: dict, list_db: ListDatabase) -> str:
 # Simply return the text of the request
 def handleOther(intention: dict) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.handleOther")
     request: str = intention.get("text_of_the_request")
-    print(f"Handling other intent with request: {request}")
+    if DEBUG or DEBUG_LLM:
+        print(f"Handling other intent with request: {request}")
     return request

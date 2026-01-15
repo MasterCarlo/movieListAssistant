@@ -71,13 +71,13 @@ from global_variables import *
 
 # ================================================================================================
 
-API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
-db = tmdb_api.MovieDatabase(API_KEY)
-movies = db.search_titles("Breaking Bad", num_results=5)
-for movie in movies:
-    # print(type(movie))
-    media_type = movie.get("type")  # Default to "movie" if not specified
-    print(media_type)
+# API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
+# db = tmdb_api.MovieDatabase(API_KEY)
+# movies = db.search_titles("Breaking Bad", num_results=5)
+# for movie in movies:
+#     # print(type(movie))
+#     media_type = movie.get("type")  # Default to "movie" if not specified
+#     print(media_type)
 
 # ================================================================================================
 
@@ -92,11 +92,13 @@ for movie in movies:
 
 # ================================================================================================
 
-# string: str = ""
-# string = string + "mi piace la pizza trallalero trallalla"
-# print(string)
+string: str = "User: "
+if string.strip().endswith("User:"):
+    print(string)
+else:
+    print("No match")
 
 # ================================================================================================
 
-#MCRSFT AZURE UN: disi
+#MCRSFT ZUR UN: disi
 # p: #Occhialini1

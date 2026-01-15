@@ -4,7 +4,6 @@ import re
 import subprocess
 import time
 
-from dialogue_state_tracker import DialogueStateTracker
 from global_variables import *
 
 # def marzolaJsonExtraction():
@@ -56,15 +55,16 @@ def startLLM() -> subprocess.Popen:
         print("Debug mode is ON: LLM process will not be started.")
         return None  
     try: 
-        command: list[str] = ["python", "-m", "main"]
+        command: list[str] = ["python", "-u","main.py"]
         project_root: str = os.path.abspath("../HMD-Lab")
         env: dict[str, str] = os.environ.copy()
         env["PYTHONPATH"] = project_root
         # Start the process
-        process: subprocess.Popen = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
-                                                            stderr=subprocess.PIPE, text=True, bufsize=1, env=env)
-        time.sleep(30)  # Give some time for the process to start, it's ver slow
-        print("process is:", process)
+        process: subprocess.Popen = subprocess.Popen(command, cwd=project_root, stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+                                                            stderr=subprocess.STDOUT, text=True, bufsize=1, env=env)
+        print("Starting LLM process, please wait...")
+        if DEBUG or DEBUG_LLM:
+            print("process is:", process)
         return process
     except Exception as e:
         print(f"An error occurred while starting the LLM: {e}")
@@ -73,27 +73,27 @@ def startLLM() -> subprocess.Popen:
 
 def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("Debug mode in askAndReadAnswer")
+    if DEBUG:
         print("Instruction sent to LLM:", instruction)
         answer: str = input("LLM: ")
         return answer
     # We instruct the LLM with the instruction + user input
     process.stdin.write(instruction + "\n")
     process.stdin.flush()
-    time.sleep(4)  # Give some time for the LLM to answer
-    
-    answer: list[str] = []
     while True:
-        line: str = process.stdout.readline()
-        if not line:
+        ch = process.stdout.read(1)
+        if not ch:
+            if DEBUG_LLM:
+                print("No line read, breaking")
             break
-        if line.strip().endswith("User:"):
+        buffer = buffer + ch
+        if buffer.endswith("User: "):
             break
-        answer.append(line)
-    answer = "".join(answer)
-    
-    return answer
+    if DEBUG_LLM:
+        print("LLM answer:", buffer)
+    return buffer
 
 # Transform the list of dictionary json into a string with null instead of None
 def jsonToString(json_list: list[dict]) -> str:

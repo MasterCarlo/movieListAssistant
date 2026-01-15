@@ -12,6 +12,6 @@ list_db: ListDatabase = ListDatabase()
 process: subprocess.Popen = first_interaction.runFirstInteraction(dialogueST)
 
 while True:
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("----- New follow-up interaction -----")
     dialogue_manager.followupInteraction(dialogueST, list_db, process)

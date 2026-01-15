@@ -8,7 +8,7 @@ from dialogue_state_tracker import DialogueStateTracker
 # but it still has null slots
 def generateLLMResponse(dialogueST: DialogueStateTracker, other_request: str) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in nlg.generateLLMResponse.")
     other: list[str] = []
     actions_performed: str = ""
