@@ -47,8 +47,8 @@ def createNewList(intention: dict, list_db: ListDatabase) -> str:
         list_db.lists[list_name] = {}
         print(f"Created new list '{list_name}'.")
     else:
-        print(f"List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')")
-        user_input: str = input()
+        print(f"Movie Assistant: List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')")
+        user_input: str = input("User: ")
         if (user_input.lower() == 'yes') or (user_input.lower() == 'y'):
             list_db.lists[list_name] = {}
             print(f"Overwritten existing list '{list_name}'.")

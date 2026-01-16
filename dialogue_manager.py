@@ -54,6 +54,9 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
         if DEBUG or DEBUG_LLM:
             print("LLM informs the user:", llmAnswer)
         dialogueST.add_turn("Movie Assistant: " + llmAnswer)
+        user_response: str = input("User: ")
+        dialogueST.update_last_user_input(user_response)
+        dialogueST.add_turn("User: " + user_response)
     return
 
 
@@ -111,7 +114,7 @@ def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, other_r
     dialogueST.add_turn("Movie Assistant: " + llmAnswer)
     if DEBUG or DEBUG_LLM:
         print("LLM asks the user:", llmAnswer)
-    userInput: str = input()
+    userInput: str = input("User: ")
     dialogueST.update_last_user_input(userInput)
     dialogueST.add_turn("User: " + userInput)
     return userInput
