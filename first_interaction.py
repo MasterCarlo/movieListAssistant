@@ -34,7 +34,7 @@ def runFirstInteraction(dialogueST: DialogueStateTracker) -> subprocess.Popen:
                 if buffer.endswith("User: "):
                     break
             if DEBUG_LLM:
-                print("LLM greetings read:", buffer)
+                print("LLM greetings read:", buffer.strip("User: "))
         
         systemGreeting: str = "Movie Assistant: Hi! I am an AI agent. I am here to help you with your movie lists. I can give you information about movies, add or remove movies to or from your lists, create new lists or show you the existing ones. I can offer you suggestions to improve your movie experience. What would you like to do today?"
         print(systemGreeting)
@@ -53,10 +53,13 @@ def runFirstInteraction(dialogueST: DialogueStateTracker) -> subprocess.Popen:
     except subprocess.CalledProcessError as e:
         print("Error occurred while executing the command:")
         print(e.stderr)
+        raise e
     except TimeoutError as e:
         print(f"Timeout error: {e}")
+        raise e
     except Exception as e:
         print(f"Another error occurred: {e}")
+        raise e
     
     intentions_list_json: list[dict] = nlu.extractIntentions(json_intentions) # from a unique string (jsonIntentions) we create a list of json strings, one for each intention, with extra information (look at intent_json_examples.json)
     dialogueST.update_intentions(intentions_list_json)

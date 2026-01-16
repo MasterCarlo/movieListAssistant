@@ -47,7 +47,7 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, other_request: str) ->
     if len(other) > 0:
         fallback_policy = fallback_policy + "; ".join(other)
     # other request is "" or something so no problem in adding it
-    instruction = instruction + fallback_policy + other_request + "This is the content of your previous conversation with the user: " + last_N_turns + "  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
+    instruction = instruction + fallback_policy + other_request + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
     return instruction
 
 def communicateCompletion(dialogueST: DialogueStateTracker, other_request: str) -> str:
@@ -57,7 +57,7 @@ def communicateCompletion(dialogueST: DialogueStateTracker, other_request: str) 
     if dialogueST.get_actions_performed() != "":
         if other_request != "":
             fallback_policy: str = FALLBACK_POLICY + "This is the text of the request(s): " + other_request
-        instruction: str = "You are a movie list assistant and movie expert, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: " + dialogueST.get_last_N_turns() + ". Please, inform the user that all his requests have been satisfied." + fallback_policy + ". Ask the user if he needs further assistance."
+        instruction: str = "You are a movie list assistant and movie expert, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + dialogueST.get_last_N_turns() + "\". Please, inform the user that all his requests have been satisfied." + fallback_policy + ". Ask the user if he needs further assistance."
     else:
         print("There is some problem in communicateCompletion")
         return ""

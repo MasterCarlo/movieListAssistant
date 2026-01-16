@@ -75,25 +75,30 @@ def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
     
     if DEBUG or DEBUG_LLM:
         print("Debug mode in askAndReadAnswer")
-    if DEBUG:
         print("Instruction sent to LLM:", instruction)
+    if DEBUG:
         answer: str = input("LLM: ")
         return answer
     # We instruct the LLM with the instruction + user input
-    process.stdin.write(instruction + "\n")
-    process.stdin.flush()
-    while True:
-        ch = process.stdout.read(1)
-        if not ch:
-            if DEBUG_LLM:
-                print("No line read, breaking")
-            break
-        buffer = buffer + ch
-        if buffer.endswith("User: "):
-            break
-    if DEBUG_LLM:
-        print("LLM answer:", buffer)
-    return buffer
+    try:
+        process.stdin.write(instruction + "\n")
+        process.stdin.flush()
+        buffer: str = ""
+        while True:
+            ch = process.stdout.read(1)
+            if not ch:
+                if DEBUG_LLM:
+                    print("No line read, breaking")
+                break
+            buffer = buffer + ch
+            if buffer.endswith("User: "):
+                break
+        if DEBUG_LLM:
+            print("LLM answer:", buffer.strip("User: "))
+        return buffer.strip("User: ").strip("System: ")
+    except Exception as e:
+        print(f"An error occurred while writing/reading to LLM stdin: {e}")
+        raise e
 
 # Transform the list of dictionary json into a string with null instead of None
 def jsonToString(json_list: list[dict]) -> str:

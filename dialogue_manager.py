@@ -60,7 +60,7 @@ def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, o
 
     if DEBUG or DEBUG_LLM:
         print("DEBUG in fillNullSlots.")
-    # Check if there are still null slots
+    # Check if there are still null slots 
     if (any(None in intention.values() for intention in dialogueST.get_intentions_json())):
         userResponse: str = ""
         userResponse = askUser(process, dialogueST, other_request)
@@ -106,7 +106,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     last_N_turns: list[str] = dialogueST.get_last_N_turns()
     last_N_turns: str = "  ".join(last_N_turns)
     json_to_fill: str = json.dumps(dialogueST.get_intentions_json(), indent=2) # TODO: In caso non funzionasse c'è la funzione jsonToString in utils.py che trasforma una lista di dict in una stringa json
-    instruction: str = f"""You are a movie list assistant and movie expert, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. This is the content of your previous conversation with the user: {last_N_turns}. Use the content of that conversation to fill the null slots inside this json: {json_to_fill}. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only actions possible: {MOVIE_INFO_ACTIONS}. Be aware of typing errors of the user.If you don't find the information to fill a slot, leave it as null. Print ONLY the same JSON string, but with the nulls that you can fill, filled, in a JSON format and NOTHING ELSE after."""
+    instruction: str = f"""You are a movie list assistant and movie expert, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. This is the content of your previous conversation with the user:" {last_N_turns}". Use the content of that conversation to fill the null slots inside this json: {json_to_fill}. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only actions possible: {MOVIE_INFO_ACTIONS}. Be aware of typing errors of the user.If you don't find the information to fill a slot, leave it as null. Print ONLY the same JSON string, but with the nulls that you can fill, filled, in a JSON format and NOTHING ELSE after."""
     filled_json: str = utils.askAndReadAnswer(process, instruction)
     if DEBUG or DEBUG_LLM:
         print("Filled JSON received in fillWithCurrentInfo: ", filled_json)
@@ -130,7 +130,12 @@ def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tu
             else:
                 actions_performed = actions_performed + actions.execute(intention, list_db, dialogueST) # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
                 intention["fulfilled"] = True
+    if DEBUG or DEBUG_LLM:
+        print("Actions performed in fulfillIntent: ", actions_performed)
+        print("Intentions after fulfilling in fulfillIntent: ", dialogueST.get_intentions_json())
     # Remove the fulfilled intentions from the list
     unfulfilled_intentions: list[dict] = [intent for intent in dialogueST.get_intentions_json() if intent.get("fulfilled") == False]
     dialogueST.update_intentions(unfulfilled_intentions)
+    if DEBUG or DEBUG_LLM:
+        print("Unfulfilled intentions after cleaning in fulfillIntent: ", unfulfilled_intentions)
     return actions_performed, other_request
