@@ -26,7 +26,8 @@ def json_to_single_line_string(data):
 print("these are the data\n" + json.dumps(data, indent=2))
 string = json_to_single_line_string(data)
 print("this is the string\n" + string)
-
+if string.startswith('[' or '{') and string.endswith(']' or '}'):
+    print("The provided string is a valid JSON array.")
 
 
 # json_list: list[dict] = []

@@ -21,7 +21,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
     action_performed: str = ""
     intent_type = intention.get("intent")
     if intent_type == CREATE_NEW_LIST_INTENT:
-        action_performed = createNewList(intention, list_db)
+        action_performed = createNewList(intention, list_db, dialogueST)
     elif intent_type == MODIFY_EXISTING_LIST_INTENT:
         action_performed = modifyList(intention, list_db)
     elif intent_type == MOVIE_INFORMATION_REQUEST_INTENT:
@@ -37,7 +37,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
 
 # TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
 # prima bisogna creare la lista e poi aggiungere il film (che va su modify list come intention)
-def createNewList(intention: dict, list_db: ListDatabase) -> str:
+def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.createNewList")
@@ -47,14 +47,19 @@ def createNewList(intention: dict, list_db: ListDatabase) -> str:
         list_db.lists[list_name] = {}
         print(f"Created new list '{list_name}'.")
     else:
-        print(f"Movie Assistant: List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')")
+        turn: str = f"Movie Assistant: List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')"
+        print(turn)
         user_input: str = input("User: ")
         if (user_input.lower() == 'yes') or (user_input.lower() == 'y'):
             list_db.lists[list_name] = {}
-            print(f"Overwritten existing list '{list_name}'.")
+            t: str = f"Overwritten existing list '{list_name}'."
+            print(t)
+            turn = turn + " " + t
         else:
-            print(f"Did not overwrite existing list '{list_name}'.")
-    
+            t: str = f"Did not overwrite existing list '{list_name}'."
+            print(t)
+            turn = turn + " " + t
+        dialogueST.add_turn(turn)
     action_performed: str = f"{CREATE_NEW_LIST_INTENT} with list name '{list_name}'"
     return action_performed
 
@@ -72,7 +77,7 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
         return action_performed
     
     if action == "add object":
-        av_object: dict = tmdb.search_movies(object_title, num_results=3)[0] # av_object is audio video object
+        av_object: dict = tmdb.search_movies(object_title, num_results=1)[0] # av_object is audio video object
         list_db.lists[list_name][object_title] = av_object
         print(f"Added '{object_title}' to list '{list_name}'.")
     elif action == "remove object":
@@ -108,7 +113,7 @@ def provideInfo(intention: dict, list_db: ListDatabase) -> str:
     object_title: str = intention.get("object_title")
     information_requested: list[str] = intention.get("information_requested")
     
-    search_results: list[dict] = tmdb.search_titles(object_title, num_results=3)
+    search_results: list[dict] = tmdb.search_titles(object_title, num_results=1)
     if not search_results:
         print(f"No results found for '{object_title}'.")
         return ""

@@ -103,17 +103,15 @@ def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
 # Transform the list of dictionary json into a string with null instead of None. it's a one line string
 # because the shell can't manage multi line text
 def jsonToString(json_list: list[dict]) -> str:
-    json_str: list[str] = []
-    for json_file in json_list: 
-        json.dumps(json_file, separators=(",", ":"), ensure_ascii=False)
-    json_str: str = " ".join(json_str) # we create a unique json string
+
+    json_str: str = json.dumps(json_list, separators=(",", ":"), ensure_ascii=False)
     return json_str
 
 # Transform a json string into a list of dict with None instead of null
 def stringToJson(json_string: str) -> list[dict]:
     json_list: list[dict] = []
     json_string = json_string.strip()
-    if json_string.startswith('[') and json_string.endswith(']'):
+    if json_string.startswith('[' or '{') and json_string.endswith(']' or '}'):
         try:
             json_list = json.loads(json_string)
         except json.JSONDecodeError as e:

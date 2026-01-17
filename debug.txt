@@ -8,3 +8,5 @@ LLM: [{"intention": "movie or series information request"}, {"intention": "show 
 [{"intent": "show existing list", "list_name": "visti","fulfilled": false},{"intent": "movie or series information request","object_title": null,"information_requested": [null], "fulfilled": false  },  {  "intent": "other", "text_of_the_request": "voglio mangiare una pizza","fulfilled": false}]
 
 [{"intent": "movie or series information request","object_title": "Avatar","information_requested": ["get director"], "fulfilled": false  }]
+
+Hi, my name is Carlo. I'd like to know the director of the movie Avatar if possible, thank you

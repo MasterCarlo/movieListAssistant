@@ -64,6 +64,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in fillWithCurrentInfo.")
+        print("Current intentions JSON to fill:", utils.jsonToString(dialogueST.get_intentions_json()))
     # Get the last N turns of the conversation from the dialogue state tracker
     last_N_turns: list[str] = dialogueST.get_last_N_turns()
     last_N_turns: str = "  ".join(last_N_turns)
@@ -75,6 +76,33 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     filled_json_list : list[dict] = utils.stringToJson(filled_json)
     dialogueST.update_intentions(filled_json_list)
     return filled_json_list
+
+
+# If there are intentions with no null slots, we fulfill them directly
+def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tuple[str, str]:
+    
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in fulfillIntent.")
+    other_request: str = "" # This is needed ONLY to create the answer for the fallback policy
+    actions_performed: str = "" # A written report of what action the LLM has completed
+    for intention in dialogueST.get_intentions_json(): 
+        if None not in intention.values() and intention.get("fulfilled") == False:
+            if intention.get("intent") == OTHER_INTENT:
+                # Simply return the text of the other request for later use in fallback policy
+                other_request = other_request + "; " + actions.execute(intention, list_db, dialogueST)
+                intention["fulfilled"] = True
+            else:
+                actions_performed = actions_performed + actions.execute(intention, list_db, dialogueST) # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
+                intention["fulfilled"] = True
+    if DEBUG or DEBUG_LLM:
+        print("Actions performed in fulfillIntent: ", actions_performed)
+        print("Intentions after fulfilling in fulfillIntent: ", dialogueST.get_intentions_json())
+    # Remove the fulfilled intentions from the list
+    unfulfilled_intentions: list[dict] = [intent for intent in dialogueST.get_intentions_json() if intent.get("fulfilled") == False]
+    dialogueST.update_intentions(unfulfilled_intentions)
+    if DEBUG or DEBUG_LLM:
+        print("Unfulfilled intentions after cleaning in fulfillIntent: ", unfulfilled_intentions)
+    return actions_performed, other_request
 
 
 def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, other_request: str) -> str | None:
@@ -118,30 +146,3 @@ def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, other_r
     dialogueST.update_last_user_input(userInput)
     dialogueST.add_turn("User: " + userInput)
     return userInput
-
-
-# If there are intentions with no null slots, we fulfill them directly
-def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tuple[str, str]:
-    
-    if DEBUG or DEBUG_LLM:
-        print("DEBUG in fulfillIntent.")
-    other_request: str = "" # This is needed ONLY to create the answer for the fallback policy
-    actions_performed: str = "" # A written report of what action the LLM has completed
-    for intention in dialogueST.get_intentions_json(): 
-        if None not in intention.values() and intention.get("fulfilled") == False:
-            if intention.get("intent") == OTHER_INTENT:
-                # Simply return the text of the other request for later use in fallback policy
-                other_request = other_request + "; " + actions.execute(intention, list_db, dialogueST)
-                intention["fulfilled"] = True
-            else:
-                actions_performed = actions_performed + actions.execute(intention, list_db, dialogueST) # do the correspondent action for each intention, like printing a list or call an API for movie info ecc.
-                intention["fulfilled"] = True
-    if DEBUG or DEBUG_LLM:
-        print("Actions performed in fulfillIntent: ", actions_performed)
-        print("Intentions after fulfilling in fulfillIntent: ", dialogueST.get_intentions_json())
-    # Remove the fulfilled intentions from the list
-    unfulfilled_intentions: list[dict] = [intent for intent in dialogueST.get_intentions_json() if intent.get("fulfilled") == False]
-    dialogueST.update_intentions(unfulfilled_intentions)
-    if DEBUG or DEBUG_LLM:
-        print("Unfulfilled intentions after cleaning in fulfillIntent: ", unfulfilled_intentions)
-    return actions_performed, other_request
