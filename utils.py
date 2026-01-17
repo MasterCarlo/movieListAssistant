@@ -100,12 +100,12 @@ def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
         print(f"An error occurred while writing/reading to LLM stdin: {e}")
         raise e
 
-# Transform the list of dictionary json into a string with null instead of None
+# Transform the list of dictionary json into a string with null instead of None. it's a one line string
+# because the shell can't manage multi line text
 def jsonToString(json_list: list[dict]) -> str:
     json_str: list[str] = []
     for json_file in json_list: 
-        value: str = json.dumps(json_file)
-        json_str.append(value)
+        json.dumps(json_file, separators=(",", ":"), ensure_ascii=False)
     json_str: str = " ".join(json_str) # we create a unique json string
     return json_str
 

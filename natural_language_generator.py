@@ -1,4 +1,5 @@
 import json
+import utils
 
 from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
@@ -14,9 +15,8 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, other_request: str) ->
     actions_performed: str = ""
     if dialogueST.get_actions_performed() != "":
         actions_performed = "These are the actions executed by you so far, on user request: " + dialogueST.get_actions_performed() + ". Inform the user that these actions have been performed."
-    json_to_fill: str = json.dumps(dialogueST.get_intentions_json())
-    last_N_turns: list[str] = dialogueST.get_last_N_turns()
-    last_N_turns: str = "  ".join(last_N_turns)
+    json_to_fill: str = utils.jsonToString(dialogueST.get_intentions_json())
+    last_N_turns: str = "  ".join(dialogueST.get_last_N_turns())
     instruction: str = "You are a movie list assistant and movie expert, you can help the user only " + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + " or answering to his " + MOVIE_INFORMATION_REQUEST_INTENT + ". " + actions_performed
     for intention in dialogueST.get_intentions_json():
         if CREATE_NEW_LIST_INTENT in intention.keys():
@@ -52,7 +52,7 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, other_request: str) ->
 
 def communicateCompletion(dialogueST: DialogueStateTracker, other_request: str) -> str:
     
-    if DEBUG:
+    if DEBUG or DEBUG_LLM:
         print("DEBUG in communicateCompletion")
     if dialogueST.get_actions_performed() != "":
         if other_request != "":

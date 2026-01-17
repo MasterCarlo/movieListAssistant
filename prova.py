@@ -4,19 +4,30 @@ import tmdb_api
 from global_variables import *
 
 
-# #Open the file and read the JSON content
-# try:
-#     with open("intent_json_examples.json", "r") as file:
-#         data = json.load(file)
-# except FileNotFoundError:
-#     print("Error: intent_json_examples.json not found.")
-#     exit(1)
-# except json.JSONDecodeError:
-#     print("Error: Invalid JSON format.")
-#     exit(1)
+#Open the file and read the JSON content
+try:
+    with open("intent_json_examples.json", "r") as file:
+        data = json.load(file)
+except FileNotFoundError:
+    print("Error: intent_json_examples.json not found.")
+    exit(1)
+except json.JSONDecodeError:
+    print("Error: Invalid JSON format.")
+    exit(1)
 
-# # Print the data to check the contents
-# print("these are the data\n" + json.dumps(data, indent=2))
+# Print the data to check the contents
+
+def json_to_single_line_string(data):
+    """
+    Convert a loaded JSON object into a one-line printable JSON string.
+    """
+    return json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+
+print("these are the data\n" + json.dumps(data, indent=2))
+string = json_to_single_line_string(data)
+print("this is the string\n" + string)
+
+
 
 # json_list: list[dict] = []
 # json_string = json.dumps(data)
@@ -92,13 +103,16 @@ from global_variables import *
 
 # ================================================================================================
 
-string: str = "User: "
-if string.strip().endswith("User:"):
-    print(string)
-else:
-    print("No match")
+# string: str = "User: "
+# if string.strip().endswith("User:"):
+#     print(string)
+# else:
+#     print("No match")
 
 # ================================================================================================
 
 #MCRSFT ZUR UN: disi
 # p: #Occhialini1
+
+# ================================================================================================
+
