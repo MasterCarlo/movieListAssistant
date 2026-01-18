@@ -7,6 +7,7 @@ CREATE_NEW_LIST_INTENT: str = "create new list"
 MOVIE_INFORMATION_REQUEST_INTENT: str = "movie or series information request"
 MODIFY_EXISTING_LIST_INTENT: str = "modify existing list"
 SHOW_EXISTING_LIST_INTENT: str = "show existing list"
+CANCEL_REQUEST_INTENT: str = "cancel previous request"
 OTHER_INTENT: str = "other"
 
 # ACTIONS

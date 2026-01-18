@@ -23,6 +23,11 @@
         "fulfilled": false
     },
     {
+        "intent": "cancel previous request",
+        "request": null,
+        "fulfilled": false
+    },
+    {
         "intent": "other",
         "request": null,
         "fulfilled": false

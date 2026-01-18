@@ -26,6 +26,10 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
         action_performed = modifyList(intention, list_db)
     elif intent_type == MOVIE_INFORMATION_REQUEST_INTENT:
         action_performed =  provideInfo(intention, list_db)
+        if action_performed == "":
+            if DEBUG or DEBUG_LLM:
+                print("No action performed in provideInfo.")
+            return ""
     elif intent_type == SHOW_EXISTING_LIST_INTENT:
         action_performed = showExistingList(intention, list_db)
     elif intent_type == OTHER_INTENT:
@@ -112,12 +116,11 @@ def provideInfo(intention: dict, list_db: ListDatabase) -> str:
     
     object_title: str = intention.get("object_title")
     information_requested: list[str] = intention.get("information_requested")
-    
     search_results: list[dict] = tmdb.search_titles(object_title, num_results=1)
     if not search_results:
-        print(f"No results found for '{object_title}'.")
-        return ""
-    
+        if DEBUG or DEBUG_LLM:
+            print(f"No results found for '{object_title}'.")
+        return object_title
     media: dict = search_results[0]  # Take the first search result
     media_id: int = media.get("id")
     media_type: str = media.get("type")

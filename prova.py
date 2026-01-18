@@ -4,31 +4,30 @@ import tmdb_api
 from global_variables import *
 
 
-#Open the file and read the JSON content
-try:
-    with open("intent_json_examples.json", "r") as file:
-        data = json.load(file)
-except FileNotFoundError:
-    print("Error: intent_json_examples.json not found.")
-    exit(1)
-except json.JSONDecodeError:
-    print("Error: Invalid JSON format.")
-    exit(1)
+# #Open the file and read the JSON content
+# try:
+#     with open("intent_json_examples.json", "r") as file:
+#         data = json.load(file)
+# except FileNotFoundError:
+#     print("Error: intent_json_examples.json not found.")
+#     exit(1)
+# except json.JSONDecodeError:
+#     print("Error: Invalid JSON format.")
+#     exit(1)
 
-# Print the data to check the contents
+# # Print the data to check the contents
 
-def json_to_single_line_string(data):
-    """
-    Convert a loaded JSON object into a one-line printable JSON string.
-    """
-    return json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+# def json_to_single_line_string(data):
+#     """
+#     Convert a loaded JSON object into a one-line printable JSON string.
+#     """
+#     return json.dumps(data, separators=(",", ":"), ensure_ascii=False)
 
-print("these are the data\n" + json.dumps(data, indent=2))
-string = json_to_single_line_string(data)
-print("this is the string\n" + string)
-if string.startswith('[' or '{') and string.endswith(']' or '}'):
-    print("The provided string is a valid JSON array.")
-
+# print("these are the data\n" + json.dumps(data, indent=2))
+# string = json_to_single_line_string(data)
+# print("this is the string\n" + string)
+# if string.startswith('[' or '{') and string.endswith(']' or '}'):
+#     print("The provided string is a valid JSON array.")
 
 # json_list: list[dict] = []
 # json_string = json.dumps(data)
@@ -78,8 +77,8 @@ if string.startswith('[' or '{') and string.endswith(']' or '}'):
 
 # ================================================================================================
 
-# string: str = """[]"""
-# print(len(string))
+string: str = f"""[{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}]"""
+print(string)
 
 # ================================================================================================
 
