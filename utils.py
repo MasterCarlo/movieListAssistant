@@ -56,7 +56,8 @@ def startLLM() -> subprocess.Popen:
         return None  
     try: 
         command: list[str] = ["python", "-u","main.py"]
-        project_root: str = os.path.abspath("../HMD-Lab")
+        this_dir: str = os.path.dirname(os.path.abspath(__file__))
+        project_root: str = os.path.abspath(os.path.join(this_dir, "..", "HMD-Lab"))
         env: dict[str, str] = os.environ.copy()
         env["PYTHONPATH"] = project_root
         # Start the process

@@ -1,9 +1,6 @@
 # The dialogue manager chooses the next best action TODO aggiungi una descrizione migliore (è anche quello che chiama le API secondo GPT)
 
 import subprocess
-import time
-import os
-import json
 import utils
 import actions
 import natural_language_generator as nlg
@@ -108,6 +105,11 @@ def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tu
         print("Intentions after fulfilling in fulfillIntent: ", dialogueST.get_intentions_json())
     # Remove the fulfilled intentions from the list
     unfulfilled_intentions: list[dict] = [intent for intent in dialogueST.get_intentions_json() if intent.get("fulfilled") == False]
+    # Change the values of movie title not found to None
+    for intention in unfulfilled_intentions:
+        if intention.get("intent") == MOVIE_INFORMATION_REQUEST_INTENT or intention.get("intent") == MODIFY_EXISTING_LIST_INTENT:
+            if intention.get("object_title") in no_movie:
+                intention.update({"object_title": None})
     dialogueST.update_intentions(unfulfilled_intentions)
     if DEBUG or DEBUG_LLM:
         print("Unfulfilled intentions after cleaning in fulfillIntent: ", unfulfilled_intentions)

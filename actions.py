@@ -11,7 +11,7 @@ from dialogue_state_tracker import DialogueStateTracker
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
 
-# TODO: fare l'azione di consiglia film
+# TODO: fare l'azione di consiglia film e fare bene l'esecuzione delle print, tipo scrivere sure here is the list
 # Execute one single action for one single intention
 def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
     
@@ -37,7 +37,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
     else:
         print("Unknown intent type:", intent_type)
     
-    return action_performed + ";"
+    return action_performed
 
 # TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
 # prima bisogna creare la lista e poi aggiungere il film (che va su modify list come intention)
@@ -65,7 +65,7 @@ def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
             turn = turn + " " + t
         dialogueST.add_turn(turn)
     action_performed: str = f"{CREATE_NEW_LIST_INTENT} with list name '{list_name}'"
-    return action_performed
+    return action_performed + ";"
 
 
 def modifyList(intention: dict, list_db: ListDatabase) -> str:
@@ -107,7 +107,7 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
         print(f"Unknown action '{action}' for modifying list.") 
     
     action_performed: str = f"{MODIFY_EXISTING_LIST_INTENT} with action '{action}' on list '{list_name}' and object title '{object_title}'. "
-    return action_performed
+    return action_performed + ";"
 
 def provideInfo(intention: dict, list_db: ListDatabase) -> str:
     
@@ -139,12 +139,13 @@ def provideInfo(intention: dict, list_db: ListDatabase) -> str:
         print(f"Could not retrieve details for '{object_title}'.")
         return ""
     
-    print(f"Information for '{object_title}':")
+    if DEBUG or DEBUG_LLM:
+        print(f"Information for '{object_title}':")
     for info in information_requested:
         if info == "get cast":
             if credits and credits.get('cast'):
                 cast = credits.get('cast', [])
-                print("Cast:", ", ".join([member['name'] for member in cast[:5]]))
+                print("This is the cast of ", object_title, ": ", ", ".join([member['name'] for member in cast[:5]]))
             else:
                 print("Cast: Not available")
         elif info == "get director":
@@ -182,7 +183,7 @@ def provideInfo(intention: dict, list_db: ListDatabase) -> str:
             print(f"Unknown information requested: '{info}'")
     
     action_performed: str = f"{MOVIE_INFORMATION_REQUEST_INTENT} for object title '{object_title}' with requested information {information_requested}"
-    return action_performed
+    return action_performed + ";"
 
 # TODO: controllare l'ordine di apparizione della stampa della lista e della risposta dell'LLM che dice ecco, ho fatto questa azione. Probabilmente sono al contrario
 def showExistingList(intention: dict, list_db: ListDatabase) -> str:

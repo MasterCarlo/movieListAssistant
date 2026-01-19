@@ -85,7 +85,7 @@ class MovieDatabase:
                     results.append(movie_info)
                     
                     # Print formatted output
-                    self._print_movie_info(movie_info)
+                    # self._print_movie_info(movie_info)
             
             return results
             
@@ -102,7 +102,7 @@ class MovieDatabase:
         """
         Search for movies and TV series by title
         """
-        print(f"\n=== Searching for movies & TV series: {query} ===\n")
+        # print(f"\n=== Searching for movies & TV series: {query} ===\n")
 
         try:
             url = f"{self.base_url}/search/multi"
@@ -118,7 +118,7 @@ class MovieDatabase:
             data = response.json()
             results = data.get('results', [])
 
-            print(f"Found {len(results)} results\n")
+            # print(f"Found {len(results)} results\n")
 
             output = []
 
@@ -170,7 +170,7 @@ class MovieDatabase:
 
                 output.append(info)
 
-                self._print_media_info(info)
+                # self._print_media_info(info)
 
             return output
 
