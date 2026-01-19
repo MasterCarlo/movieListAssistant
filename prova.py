@@ -77,8 +77,8 @@ from global_variables import *
 
 # ================================================================================================
 
-string: str = f"""[{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}]"""
-print(string)
+# string: str = f"""[{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}]"""
+# print(string)
 
 # ================================================================================================
 
@@ -92,14 +92,15 @@ print(string)
 
 # ================================================================================================
 
-# dictionary = {
-#     "Inception": {"year": 2010, "rate": 8.8},
-#     "Interstellar": {"year": 2014, "rate": 8.6}
-# }
+dictionary = {
+    "Inception": {"year": 2010, "rate": 8.8},
+    "Interstellar": {"year": 2014, "rate": 8.6},
+    "things_I_like": ["movies", "music", "programming"]
+}
 
-# dictionary["Inception"]["director"] = "Christopher Nolan"
+dictionary["Inception"]["director"] = "Christopher Nolan"
 
-# print(dictionary)
+print(dictionary.get("things_I_like"))
 
 # ================================================================================================
 
