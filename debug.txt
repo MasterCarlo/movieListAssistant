@@ -10,3 +10,5 @@ LLM: [{"intention": "movie or series information request"}, {"intention": "show 
 [{"intent": "movie or series information request","object_title": "Avatar","information_requested": ["get director"], "fulfilled": false  }]
 
 Hi, my name is Carlo. I'd like to know the director of the movie Avatar if possible, thank you
+Hi, my name is Carlo. I'd like to know the director of that movie with the bunnies if possible, thank you
+Hi, my name is Carlo. I'd like to know the title of that movie with the bunnies if possible, thank you

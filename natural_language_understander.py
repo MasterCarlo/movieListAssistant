@@ -52,14 +52,16 @@ def extractIntentions(json_answer: str) -> list[dict]:
 
 
 def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracker):
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in checkForIntention")
     user_response: str = dialogueST.get_last_user_input()
     intentions_str: str = json.dumps(dialogueST.get_intentions_json())
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    instruction: str = f"""You are a movie list assistant and movie expert, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT}, {SHOW_EXISTING_LIST_INTENT}, answer his {MOVIE_INFORMATION_REQUEST_INTENT} or {CANCEL_REQUEST_INTENT}. This is the content of your previous conversation with the user: {last_N_turns}. Given the current intentions of the user expressed in this json: {intentions_str}, I want you to extract, from the last user input ({user_response}), any NEW intention that is not already present in the json, they can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else, for example For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]. Otherwise print an empty json list: []."""
+    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". Given the current intentions of the user expressed in this json: {intentions_str}, I want you to extract, from the last user input ({user_response}), any NEW intention that is not already present in the json, they can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] is hard to catch, it's rarely explicit: if the users say something like "never mind", "I don't care anymore", "go on", probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. If the action is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: {MOVIE_INFO_ACTIONS}. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else, for example For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]. Otherwise print an empty json list: []."""
     json_intentions: str = utils.askAndReadAnswer(process, instruction)
     print("New intentions JSON Answer received: ", json_intentions)
-    new_intentions_list_json: list[dict] = extractIntentions(json_intentions)
-    if len(new_intentions_list_json) > 0:
+    if json_intentions != "[]":
+        new_intentions_list_json: list[dict] = extractIntentions(json_intentions)
         list_of_inte: list[dict] = dialogueST.get_intentions_json()
         list_of_inte.extend(new_intentions_list_json)
         dialogueST.update_intentions(list_of_inte)

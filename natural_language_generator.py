@@ -17,7 +17,7 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, no_movie: list[str], o
         actions_performed = "These are the actions executed by you so far, on user request: " + dialogueST.get_actions_performed() + ". Inform the user that these actions have been performed."
     json_to_fill: str = utils.jsonToString(dialogueST.get_intentions_json())
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    instruction: str = "You are a movie list assistant and movie expert, you can help the user only " + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + ", " + CANCEL_REQUEST_INTENT + " or answer to his " + MOVIE_INFORMATION_REQUEST_INTENT + ". " + actions_performed
+    instruction: str = "You are a movie list assistant, you can help the user only " + MODIFY_EXISTING_LIST_INTENT + ", " + CREATE_NEW_LIST_INTENT + ", " + CANCEL_REQUEST_INTENT + " or answer to his " + MOVIE_INFORMATION_REQUEST_INTENT + ". " + actions_performed
     for intention in dialogueST.get_intentions_json():
         if CREATE_NEW_LIST_INTENT in intention.keys():
             if None in intention.values():
@@ -66,7 +66,7 @@ def communicateCompletion(dialogueST: DialogueStateTracker, other_request: str) 
         if other_request != "":
             fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + other_request
         last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-        instruction: str = "You are a movie list assistant and movie expert, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + last_N_turns + "\". Please, inform the user that all his requests have been satisfied and if he needs further assistance." + fallback_policy + " Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else."
+        instruction: str = "You are a movie list assistant, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + last_N_turns + "\". Please, inform the user that all his requests have been satisfied and if he needs further assistance." + fallback_policy + " Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else."
     else:
         print("There is some problem in communicateCompletion")
         return ""
