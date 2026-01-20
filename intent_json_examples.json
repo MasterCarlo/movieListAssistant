@@ -24,7 +24,7 @@
     },
     {
         "intent": "cancel previous request",
-        "request": null,
+        "intent_to_cancel": null,
         "fulfilled": false
     },
     {

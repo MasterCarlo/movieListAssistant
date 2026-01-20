@@ -8,7 +8,7 @@ from global_variables import *
 def startLLM() -> subprocess.Popen:
     
     if DEBUG:
-        print("Debug mode is ON: LLM process will not be started.")
+        print("DEBUG mode  is ON: LLM process will not be started.")
         return None  
     try: 
         command: list[str] = ["python", "-u","main.py"]
@@ -31,8 +31,8 @@ def startLLM() -> subprocess.Popen:
 def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
     
     if DEBUG or DEBUG_LLM:
-        print("Debug mode in askAndReadAnswer")
-        print("Instruction sent to LLM:", instruction)
+        print("DEBUG in askAndReadAnswer")
+       # print("Instruction sent to LLM:", instruction)
     if DEBUG:
         answer: str = input("LLM: ")
         return answer

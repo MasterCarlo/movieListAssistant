@@ -9,11 +9,6 @@ import subprocess
 from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
 
-# # we check the intention of the user
-# if OTHER_INTENT in dialogue_state_tracker.dialogueST.get_json():
-#     if INFO_REQUEST_INTENT in dialogue_state_tracker.dialogueST.get_json() or MODIFY_LIST_INTENT in dialogue_state_tracker.dialogueST.get_json():
-#         #the user expressed at least one legitimate intention and a non legitimate one
-#         system_prompt = "You are a movie expert. A user asked something "
 
 # TODO: testare col debug le funzioni modify list e get movie information
 
@@ -39,7 +34,7 @@ def extractIntentions(json_answer: str) -> list[dict]:
             intent: dict = json.loads("""{"intent":""" + """\"""" + MOVIE_INFORMATION_REQUEST_INTENT + """\", "object_title": null, "information_requested": [null], "fulfilled": false}""")
             intentions_list_json.append(intent)
         if CANCEL_REQUEST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + CANCEL_REQUEST_INTENT + """\", "request": null, "fulfilled": false}""")
+            intent: dict = json.loads("""{"intent":""" + """\"""" + CANCEL_REQUEST_INTENT + """\", "intent_to_cancel": null, "fulfilled": false}""")
             intentions_list_json.append(intent)
         if OTHER_INTENT in intentions:
             intent: dict = json.loads("""{"intent":""" + """\"""" + OTHER_INTENT + """\", "text_of_the_request": null, "fulfilled": false}""")
@@ -57,16 +52,16 @@ def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracke
     user_response: str = dialogueST.get_last_user_input()
     intentions_str: str = json.dumps(dialogueST.get_intentions_json())
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". Given the current intentions of the user expressed in this json: {intentions_str}, I want you to extract, from the last user input ({user_response}), any NEW intention that is not already present in the json, they can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] is hard to catch, it's rarely explicit: if the users say something like "never mind", "I don't care anymore", "go on", probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. If the action is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: {MOVIE_INFO_ACTIONS}. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else, for example For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]. Otherwise print an empty json list: []."""
+    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". Given the current intentions of the user expressed in this json: {intentions_str}, I want you to extract, from the last user input ({user_response}), any NEW intention that is not already present in the json, they can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: {MODIFY_LIST_ACTIONS}. If the action is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: {MOVIE_INFO_ACTIONS}. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else, for example For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]. Otherwise print an empty json list: []."""
     json_intentions: str = utils.askAndReadAnswer(process, instruction)
-    print("New intentions JSON Answer received: ", json_intentions)
+    print("New intentions JSON Answer received in checkForIntentions: ", json_intentions)
     if json_intentions != "[]":
         new_intentions_list_json: list[dict] = extractIntentions(json_intentions)
         list_of_inte: list[dict] = dialogueST.get_intentions_json()
         list_of_inte.extend(new_intentions_list_json)
         dialogueST.update_intentions(list_of_inte)
         if DEBUG or DEBUG_LLM:
-            print("Updated intentions in dialogue state tracker in checkForIntention:", dialogueST.get_intentions_json())
+            print("Updated intentions in dialogue state tracker in checkForIntention:", json.dumps(dialogueST.get_intentions_json(), indent=2))
     elif DEBUG or DEBUG_LLM:
         print("No new intentions found in checkForIntention.")
     

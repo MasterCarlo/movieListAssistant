@@ -36,7 +36,7 @@ def runFirstInteraction(dialogueST: DialogueStateTracker) -> subprocess.Popen:
             if DEBUG_LLM:
                 print("LLM greetings read:", buffer.strip("User: "))
         
-        systemGreeting: str = "Movie Assistant: Hi! I am an AI agent. I am here to help you with your movie lists. I can give you information about movies, add or remove movies to or from your lists, create new lists or show you the existing ones. I can offer you suggestions to improve your movie experience. What would you like to do today?"
+        systemGreeting: str = "Movie Assistant: Hi! I am an AI agent. I am here to help you with your movie lists. If you give me a movie title, I can give you some information about it. I can add or remove movies to or from your lists, create new lists or show you the existing ones. What would you like to do today?"
         print(systemGreeting)
         dialogueST.add_turn(systemGreeting)
         user_input: str = input("User: ")
