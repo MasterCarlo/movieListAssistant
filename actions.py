@@ -2,7 +2,6 @@
 # and the calls to tmdb API
 
 import tmdb_api
-import utils
 
 from global_variables import *
 from list_database import ListDatabase

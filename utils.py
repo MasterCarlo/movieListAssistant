@@ -103,15 +103,16 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
             return MOVIE_INFO_ACTIONS.replace('"', '').split(", ")
         return False
     
-    filled_json_list: list[dict] = dialogueST.get_intentions_json()
+    intentions: list[dict] = dialogueST.get_intentions_json()
     if DEBUG or DEBUG_LLM:
         print("DEBUG in llmSupervision")
-        print("Filled JSON list to supervise:", json.dumps(filled_json_list, indent=2))
+        print("Filled JSON list to supervise:", json.dumps(intentions, indent=2))
     other_request: str = ""
-    for intention in filled_json_list:
-        actions: list[str] = modifyOrInfo(intention)
+    updated_intentions: list[dict] = []
+    for intent in intentions:
+        actions: list[str] = modifyOrInfo(intent)
         if actions:
-            query: list[str] = intention.get("action", intention.get("information_requested", [])) # return the action or the information_requested
+            query: list[str] = intent.get("action", intent.get("information_requested", [])) # return the action or the information_requested
             valid_actions: list[str] = actions
             filtered_query: list[str] = []
             for q in query:
@@ -120,13 +121,16 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
                     other_request = other_request + "; " + q
                 else:
                     filtered_query.append(q)
-
-            if MODIFY_EXISTING_LIST_INTENT in intention.values():
-                intention["action"] = filtered_query
+            if MODIFY_EXISTING_LIST_INTENT in intent.values():
+                intent["action"] = filtered_query
+                if not intent.get("action") == [] or not intent.get("action")[0] is None:
+                    updated_intentions.append(intent)
             else:
-                intention["information_requested"] = filtered_query
-
-    dialogueST.update_intentions(filled_json_list)
+                intent["information_requested"] = filtered_query
+                if (not intent.get("information_requested") == []) or (not intent.get("information_requested")[0] is None):
+                    updated_intentions.append(intent)
+    
+    dialogueST.update_intentions(updated_intentions)
     if DEBUG or DEBUG_LLM:
-        print("Filled JSON list after LLM supervision:", json.dumps(filled_json_list, indent=2))
+        print("Filled JSON list after LLM supervision:", json.dumps(intentions, indent=2))
     return other_request
