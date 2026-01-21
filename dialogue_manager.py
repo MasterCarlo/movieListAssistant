@@ -47,7 +47,7 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
     else: # All intentions have been fulfilled
         if DEBUG or DEBUG_LLM:
             print("All intentions have been fulfilled.")
-        instruction: str = nlg.communicateCompletion(dialogueST, other_request)
+        instruction: str = nlg.completion(dialogueST, other_request)
         dialogueST.clear_actions() # we clear the actions performed for the next interactions
         llmAnswer: str = utils.askAndReadAnswer(process, instruction) # we tell the LLM to inform the user that all his requests have been satisfied
         print("Movie Assistant:", llmAnswer)

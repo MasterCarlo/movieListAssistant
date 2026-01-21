@@ -95,12 +95,18 @@ from global_variables import *
 dictionary = {
     "Inception": {"year": 2010, "rate": 8.8},
     "Interstellar": {"year": 2014, "rate": 8.6},
-    "things_I_like": ["movies", "music", "programming"]
+    "things_I_like": ["movies", "music", "programming"],
+    "list": [None]
 }
 
 dictionary["Inception"]["director"] = "Christopher Nolan"
 
-print(dictionary.get("things_I_like"))
+# print(dictionary.get("things_I_like"))
+# print(dictionary.get("not_existing_key", "Default Value"))
+print(dictionary.get("list"))
+print(dictionary.get("list")[0])
+print(type(dictionary.get("list")))
+print(dictionary.get("list")[0] is None)
 
 # ================================================================================================
 

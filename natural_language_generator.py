@@ -57,7 +57,8 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, no_movie: list[str], o
     instruction = instruction + fallback_policy + other_request + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
     return instruction
 
-def communicateCompletion(dialogueST: DialogueStateTracker, other_request: str) -> str:
+# Communicate to the user that all his requests have been satisfied
+def completion(dialogueST: DialogueStateTracker, other_request: str) -> str:
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in communicateCompletion")

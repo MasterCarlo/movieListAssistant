@@ -139,10 +139,11 @@ def provideInfo(intention: dict, list_db: ListDatabase, dialogueST: DialogueStat
         return "unknown media type"
     
     if not media_details:
-        print(f"Could not retrieve details for '{object_title}'.")
+        print(f"Movie Assistant: Could not retrieve details for '{object_title}'.")
         return ""
     
     turn: str = "Movie Assistant: Here is the information you requested for '" + object_title + "'."
+    print(turn)
     if DEBUG or DEBUG_LLM:
         print(f"Information for '{object_title}':")
     for info in information_requested:

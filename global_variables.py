@@ -1,6 +1,6 @@
 #DEBUG
 DEBUG: bool = False
-DEBUG_LLM: bool = False
+DEBUG_LLM: bool = True
 
 # INTENTS
 CREATE_NEW_LIST_INTENT: str = "create new list"

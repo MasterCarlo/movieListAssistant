@@ -3,7 +3,7 @@ import os
 import subprocess
 
 from global_variables import *
-from movieListAssistant.dialogue_state_tracker import DialogueStateTracker
+from dialogue_state_tracker import DialogueStateTracker
 
 
 def startLLM() -> subprocess.Popen:
@@ -96,41 +96,36 @@ def stringToJson(json_string: str) -> list[dict]:
 # Qwen3 is stupid we need to check
 def llmSupervision(dialogueST: DialogueStateTracker) -> str:
     
+    def modifyOrInfo(intention: dict) -> list[str] | bool:
+        if MODIFY_EXISTING_LIST_INTENT in intention.values() and (intention.get("action")[0] is not None):
+            return MODIFY_LIST_ACTIONS.replace('"', '').split(", ")
+        if MOVIE_INFORMATION_REQUEST_INTENT in intention.values() and (intention.get("information_requested")[0] is not None):
+            return MOVIE_INFO_ACTIONS.replace('"', '').split(", ")
+        return False
+    
     filled_json_list: list[dict] = dialogueST.get_intentions_json()
     if DEBUG or DEBUG_LLM:
         print("DEBUG in llmSupervision")
         print("Filled JSON list to supervise:", json.dumps(filled_json_list, indent=2))
     other_request: str = ""
     for intention in filled_json_list:
-        if MODIFY_EXISTING_LIST_INTENT in intention.values():
-            actions: list[str] = intention.get("action", [])
-            valid_actions: list[str] = MODIFY_LIST_ACTIONS.replace('"', '').split(", ")
-
-            filtered_actions: list[str] = []
-            for action in actions:
-                if action not in valid_actions:
-                    print(f"LLM supervision: action '{action}' is not valid. Deleting it.")
-                    other_request = other_request + "; " + action
+        actions: list[str] = modifyOrInfo(intention)
+        if actions:
+            query: list[str] = intention.get("action", intention.get("information_requested", [])) # return the action or the information_requested
+            valid_actions: list[str] = actions
+            filtered_query: list[str] = []
+            for q in query:
+                if q not in valid_actions:
+                    print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
+                    other_request = other_request + "; " + q
                 else:
-                    filtered_actions.append(action)
+                    filtered_query.append(q)
 
-            intention["action"] = filtered_actions
+            if MODIFY_EXISTING_LIST_INTENT in intention.values():
+                intention["action"] = filtered_query
+            else:
+                intention["information_requested"] = filtered_query
 
-        elif MOVIE_INFORMATION_REQUEST_INTENT in intention.values():
-            info_requested: list[str] = intention.get("information_requested", [])
-            valid_info: list[str] = MOVIE_INFO_ACTIONS.replace('"', '').split(", ")
-
-            filtered_info: list[str] = []
-            for info in info_requested:
-                if info not in valid_info:
-                    print(
-                        f"LLM supervision: information requested '{info}' is not valid. Deleting it."
-                    )
-                    other_request = other_request + "; " + info
-                else:
-                    filtered_info.append(info)
-
-            intention["information_requested"] = filtered_info
     dialogueST.update_intentions(filled_json_list)
     if DEBUG or DEBUG_LLM:
         print("Filled JSON list after LLM supervision:", json.dumps(filled_json_list, indent=2))
