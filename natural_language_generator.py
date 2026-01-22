@@ -49,12 +49,15 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) 
     # TODO: guardare nei json gli other intent perchè forse sono doppi, potrei averli sia in unsuccess che nelle intentions
     fallback_policy: str = ""
     if len(other) > 0:
-        fallback_policy = FALLBACK_POLICY + "This are the request(s): " + "; ".join(other)
+        fallback_policy = FALLBACK_POLICY + "This are the request(s): " + "; ".join(other) + "; " + "; ".join(unsuccess.get_other_request())
     if len(unsuccess.get_no_movie) > 0:
-        movie_list_str: str = "; ".join(unsuccess.get_no_movie)
-        fallback_policy = fallback_policy + unsuccess.get_other_request + " Tell the user that you were not able to find any movie or series with the given title(s): " + movie_list_str + ". Ask him if those are the correct titles."
-    # other request is "" or something if needed so no problem in adding it
+        no_movies: str = "; ".join(unsuccess.get_no_movie)
+        fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."    
+    if len(unsuccess.get_no_list) > 0:
+        no_lists: str = "; ".join(unsuccess.get_no_list)
+        fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     instruction = instruction + fallback_policy + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
+    unsuccess.clear()
     return instruction
 
 # Communicate to the user that all his requests have been satisfied
@@ -64,10 +67,18 @@ def completion(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) -> str:
         print("DEBUG in communicateCompletion")
     fallback_policy: str = ""
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    if unsuccess.get_other_request != "":
-        fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + unsuccess.get_other_request
+    if len(unsuccess.get_other_request()) > 0:
+        fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + "; ".join(unsuccess.get_other_request())
+    if len(unsuccess.get_no_movie) > 0:
+        no_movies: str = "; ".join(unsuccess.get_no_movie)
+        fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."
+    if len(unsuccess.get_no_list) > 0:
+        no_lists: str = "; ".join(unsuccess.get_no_list)
+        fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     if dialogueST.get_actions_performed() != "":
         instruction: str = "You are a movie list assistant, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + last_N_turns + "\". Please, inform the user that all his requests have been satisfied and if he needs further assistance." + fallback_policy + " Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else."
     else:
         return "You are a movie list assistant, it seems that there are no actions performed to inform the user about. This is your previous conversation with the user: \"" + last_N_turns + "\"." + fallback_policy + " Please answer the user accordingly and ask if he needs further assistance. Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else. "
+    unsuccess.clear()
+    dialogueST.clear_actions() # clear actions for the next interactions
     return instruction

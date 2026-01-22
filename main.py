@@ -6,8 +6,7 @@ from dialogue_state_tracker import DialogueStateTracker
 from list_database import ListDatabase
 from global_variables import *
 
-# TODO: specificare meglio a QWEN3 che other significa qualunque cosa non rientri nelle altre intentions
-# TODO: gestire uscita dal programma e gestire memoria a lungo termine, se sepngo e riaccendo voglio avere le stesse liste
+# TODO: gestire uscita dal programma e gestire memoria a lungo termine, se spengo e riaccendo voglio avere le stesse liste
 # TODO: inserire dei counter nei json perchè se una intention è lì da 6 interazioni a sto punto cancelliamola
 dialogueST: DialogueStateTracker = DialogueStateTracker()
 list_db: ListDatabase = ListDatabase()

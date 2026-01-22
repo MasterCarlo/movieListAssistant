@@ -26,7 +26,11 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
         action_performed = createNewList(intention, list_db, dialogueST)
     elif intent_type == MODIFY_EXISTING_LIST_INTENT:
         action_performed = modifyList(intention, list_db)
-        if intention.get("object_title") == action_performed: # no movie was found to add/remove
+        if intention.get("list_name") == action_performed: # no list was found to modify
+            unsuccess.add_no_list(action_performed)
+            intention.update({"list_name": None}) # reset the list name to None to ask again later
+            return unsuccess
+        elif intention.get("object_title") == action_performed: # no movie was found to add/remove
             unsuccess.add_no_movie(action_performed)
             intention.update({"object_title": None}) # reset the object title to None to ask again later
             return unsuccess
@@ -47,7 +51,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
         return unsuccess
     else:
         print("Unknown intent type:", intent_type)
-    intention["fulfilled"] = True
+    intention["fulfilled"] = True # The action has been successful, the intention has been fulfilled
     return action_performed
 
 # TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
@@ -90,6 +94,11 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
     if DEBUG:
         action_performed: str = f"{MODIFY_EXISTING_LIST_INTENT} with action '{action}' on list '{list_name}' and object title '{object_title}'"
         return action_performed
+    
+    # If the list is not found, return the list name to inform the user later
+    if list_name not in list_db.lists:
+        print(f"List '{list_name}' does not exist.")
+        return list_name  
     
     for action in actions:
         if action == "add object":

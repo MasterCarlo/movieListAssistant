@@ -9,25 +9,28 @@ from dialogue_state_tracker import DialogueStateTracker
 class Unsuccess:
     def __init__(self):
         self.no_movie: list[str] = [] # list of movie titles not found
-        self.other_request: str = "" # text of out of bound requests (i.e. asking for movie country)
+        self.no_list: list[str] = [] # list of list names not found
+        self.other_request: list[str] = [] # text of out of bound requests (i.e. asking for movie country)
     def add_no_movie(self, title: str):
         self.no_movie.append(title)
+    def add_no_list(self, list_name: str):
+        self.no_list.append(list_name)
     def add_other_request(self, request: str):
-        self.other_request += request + "; "
+        self.other_request.append(request)
     def get_no_movie(self) -> list[str]:
         return self.no_movie
-    def get_other_request(self) -> str:
+    def get_no_list(self) -> list[str]:
+        return self.no_list
+    def get_other_request(self) -> list[str]:
         return self.other_request
     def clear(self):
         self.no_movie = []
-        self.other_request = ""
+        self.no_list = []
+        self.other_request = []
     def merge(self, other: 'Unsuccess'):
         self.no_movie.extend(other.get_no_movie())
-        if other.get_other_request():
-            if self.other_request:
-                self.other_request += "; " + other.get_other_request()
-            else:
-                self.other_request = other.get_other_request()
+        self.no_list.extend(other.get_no_list())
+        self.other_request.extend(other.get_other_request())
 
 
 def startLLM() -> subprocess.Popen:

@@ -13,7 +13,7 @@
     },
     {
         "intent": "show existing list/all lists", 
-        "list_title": null,
+        "list_name": null,
         "fulfilled": false
     },
     {
