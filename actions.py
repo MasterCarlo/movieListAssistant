@@ -84,7 +84,7 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
     
     for action in actions:
         if action == "add object":
-            av_object: dict = tmdb.search_movies(object_title, num_results=1)[0] # av_object is audio video object
+            av_object: dict = tmdb.search_movies(object_title, num_results=1)[0] # av_object is audio video object, can be tv or movie
             list_db.lists[list_name][object_title] = av_object
             print(f"Added '{object_title}' to list '{list_name}'.")
         elif action == "remove object":
@@ -216,18 +216,28 @@ def showExistingList(intention: dict, list_db: ListDatabase) -> str:
     if DEBUG:
         print("lista stampata e va bene così")
         action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'"
-        return action_performed
+        return action_performed + ";"
     
-    movie_list: dict = list_db.get_list(list_name)
-    if movie_list is not None:
-        print(f"Contents of list '{list_name}':")
-        for title, details in movie_list.items():
-            print(f"- {title}: {details}")
+    if "all" in list_name.lower():
+        print("Showing all existing lists:")
+        for lname, movie_list in list_db.lists.items():
+            print(f"List '{lname}':")
+            for title, details in movie_list.items():
+                print(f"- {title}: {details}")
+            print("")  # Blank line between lists
+        action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for all lists"
+        return action_performed + ";"
     else:
-        print(f"List '{list_name}' does not exist.")
+        movie_list: dict = list_db.get_list(list_name)
+        if movie_list is not None:
+            print(f"Contents of list '{list_name}':")
+            for title, details in movie_list.items():
+                print(f"- {title}: {details}")
+        else:
+            print(f"List '{list_name}' does not exist.")
     
     action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'"
-    return action_performed
+    return action_performed + ";"
 
 
 def cancelRequest(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:

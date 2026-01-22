@@ -12,7 +12,7 @@
         "fulfilled": false
     },
     {
-        "intent": "show existing list", 
+        "intent": "show existing list/all lists", 
         "list_title": null,
         "fulfilled": false
     },

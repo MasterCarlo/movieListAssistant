@@ -93,6 +93,7 @@ def stringToJson(json_string: str) -> list[dict]:
         print("The provided string is not a valid JSON array.")
     return json_list
 
+# TODO: move this function to natural_language_understander.py
 # Qwen3 is stupid we need to check
 def llmSupervision(dialogueST: DialogueStateTracker) -> str:
     
@@ -109,8 +110,11 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
         print("Filled JSON list to supervise:", json.dumps(intentions, indent=2))
     other_request: str = ""
     updated_intentions: list[dict] = []
+    flag: bool = False
+    updated: bool = False
     for intent in intentions:
         actions: list[str] = modifyOrInfo(intent)
+        invalid = False
         if actions:
             query: list[str] = intent.get("action", intent.get("information_requested", [])) # return the action or the information_requested
             valid_actions: list[str] = actions
@@ -119,18 +123,20 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
                 if q not in valid_actions:
                     print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
                     other_request = other_request + "; " + q
+                    invalid = True
+                    updated = True
                 else:
                     filtered_query.append(q)
             if MODIFY_EXISTING_LIST_INTENT in intent.values():
                 intent["action"] = filtered_query
-                if not intent.get("action") == [] or not intent.get("action")[0] is None:
+                if (not invalid) or ((not intent.get("action") == []) and (not intent.get("action") is None)): # if after filtering it's not empty we keep it, else we drop it because it was a fully invalid request. If it was already empty (invalid == False) we keep it to ask the user later
                     updated_intentions.append(intent)
             else:
                 intent["information_requested"] = filtered_query
-                if (not intent.get("information_requested") == []) or (not intent.get("information_requested")[0] is None):
+                if (not invalid) or ((not intent.get("information_requested") == []) and (not intent.get("information_requested") is None)): # if after filtering it's not empty we keep it, else we drop it because it was a fully invalid request. If it was already empty (invalid == False) we keep it to ask the user later
                     updated_intentions.append(intent)
-    
-    dialogueST.update_intentions(updated_intentions)
+    if updated:
+        dialogueST.update_intentions(updated_intentions)
     if DEBUG or DEBUG_LLM:
         print("Filled JSON list after LLM supervision:", json.dumps(intentions, indent=2))
     return other_request
