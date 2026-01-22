@@ -11,53 +11,8 @@ Hi, my name is Carlo. I'd like to know the director of the movie Avatar if possi
 Hi, my name is Carlo. I'd like to know the director of that movie with the bunnies if possible, thank you
 Hi, my name is Carlo. I'd like to know the title of that movie with the bunnies if possible, thank you
 
-What can you tell me about the dark night?
+What can you tell me about the dark knight?
 
-
-
-(venv) disi@labT31YWB:~/movieListAssistant$ python main.py 
-Wait a moment, the Movie Assistant is loading...
-Starting LLM process, please wait...
-Movie Assistant: Hi! I am an AI agent. I am here to help you with your movie lists. If you give me a movie title, I can give you some information about it. I can add or remove movies to or from your lists, create new lists or show you the existing ones. What would you like to do today?
-User: hello
-No intentions found in the JSON answer.
-There is some problem in communicateCompletion
-Movie Assistant: []
-User: can you tell me something about Harry Potter
-Movie Assistant: Here is the information you requested for 'Harry Potter'.
-This is the cast of Harry Potter: Daniel Radcliffe, Rupert Grint, Emma Watson, Richard Harris, Tom Felton
-This is the director(s) of Harry Potter: Chris Columbus
-The year Harry Potter got out is 2001
-The genres of Harry Potter are: Adventure, Fantasy
-The rating for Harry Potter is: 7.9
-The plot of Harry Potter is: Harry Potter has lived under the stairs at his aunt and uncle's house his whole life. But on his 11th birthday, he learns he's a powerful wizard—with a place waiting for him at the Hogwarts School of Witchcraft and Wizardry. As he learns to harness his newfound powers with the help of the school's kindly headmaster, Harry uncovers the truth about his parents' deaths—and about the villain who's to blame.
-The duration of Harry Potter is: 152 minutes
-Movie Assistant: All your requests have been satisfied! If you need any more help, just let me know. 😊
-User: can you tell me other movies with some actors who starred in this movie?
-There is some problem in communicateCompletion
-Movie Assistant: [{"intent":"movie or series information request","object_title":"Harry Potter","information_requested":["other movies with actors from Harry Potter"],"fulfilled":false}]
-User: what about Star Wars a new hope
-Movie Assistant: Here is the information you requested for 'Star Wars: A New Hope'.
-This is the cast of Star Wars: A New Hope: Mark Hamill, Harrison Ford, Carrie Fisher, Peter Cushing, Alec Guinness
-This is the director(s) of Star Wars: A New Hope: George Lucas
-The year Star Wars: A New Hope got out is 1977
-The genres of Star Wars: A New Hope are: Adventure, Action, Science Fiction
-The rating for Star Wars: A New Hope is: 8.202
-The plot of Star Wars: A New Hope is: Princess Leia is captured and held hostage by the evil Imperial forces in their effort to take over the galactic Empire. Venturesome Luke Skywalker and dashing captain Han Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue the beautiful princess and restore peace and justice in the Empire.
-The duration of Star Wars: A New Hope is: 121 minutes
-Movie Assistant: All your requests have been satisfied! If you need any more help, just let me know. 😊
-User: can you tell me the movie with the longest duration?
-There is some problem in communicateCompletion
-Movie Assistant: [{"intention":"movie or series information request","object_title":"Harry Potter","information_requested":["duration"],"fulfilled":false}]
-User: how long is the Avatar moive
-There is some problem in communicateCompletion
-Movie Assistant: [{"intent":"movie or series information request","object_title":"Avatar","information_requested":["duration"],"fulfilled":false}]
-User: what about Avatar movie?
-There is some problem in communicateCompletion
-Movie Assistant: [{"intent":"movie or series information request","object_title":"Avatar","information_requested":["duration"],"fulfilled":false}]
-User: the dark knight
-There is some problem in communicateCompletion
-Movie Assistant: [{"intent":"movie or series information request","object_title":"The Dark Knight","information_requested":["duration"]}]
-User: hello
-There is some problem in communicateCompletion
-Movie Assistant: []
+Hi I want to create a new list
+Can you add to that list "The dark knight rises"? Thank you 
+Can you show me the list good movies?

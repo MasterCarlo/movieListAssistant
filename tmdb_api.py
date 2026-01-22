@@ -8,6 +8,7 @@ Get your free API key from: https://www.themoviedb.org/settings/api
 import requests
 import json
 
+from global_variables import *
 class MovieDatabase:
     def __init__(self, api_key):
         """
@@ -47,7 +48,8 @@ class MovieDatabase:
             data = response.json()
             movies = data.get('results', [])
             
-            print(f"Found {len(movies)} results\n")
+            if DEBUG or DEBUG_LLM:
+                print(f"Found {len(movies)} results\n")
             
             results = []
             for movie in movies[:num_results]:
@@ -118,7 +120,8 @@ class MovieDatabase:
             data = response.json()
             results = data.get('results', [])
 
-            # print(f"Found {len(results)} results\n")
+            if DEBUG or DEBUG_LLM:
+                print(f"Found {len(results)} results\n")
 
             output = []
 

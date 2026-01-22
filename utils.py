@@ -5,6 +5,30 @@ import subprocess
 from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
 
+# I use it like a C struct
+class Unsuccess:
+    def __init__(self):
+        self.no_movie: list[str] = [] # list of movie titles not found
+        self.other_request: str = "" # text of out of bound requests (i.e. asking for movie country)
+    def add_no_movie(self, title: str):
+        self.no_movie.append(title)
+    def add_other_request(self, request: str):
+        self.other_request += request + "; "
+    def get_no_movie(self) -> list[str]:
+        return self.no_movie
+    def get_other_request(self) -> str:
+        return self.other_request
+    def clear(self):
+        self.no_movie = []
+        self.other_request = ""
+    def merge(self, other: 'Unsuccess'):
+        self.no_movie.extend(other.get_no_movie())
+        if other.get_other_request():
+            if self.other_request:
+                self.other_request += "; " + other.get_other_request()
+            else:
+                self.other_request = other.get_other_request()
+
 
 def startLLM() -> subprocess.Popen:
     
@@ -95,22 +119,22 @@ def stringToJson(json_string: str) -> list[dict]:
 
 # TODO: move this function to natural_language_understander.py
 # Qwen3 is stupid we need to check
-def llmSupervision(dialogueST: DialogueStateTracker) -> str:
+def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
     
     def modifyOrInfo(intention: dict) -> list[str] | bool:
         if MODIFY_EXISTING_LIST_INTENT in intention.values() and (intention.get("action")[0] is not None):
-            return MODIFY_LIST_ACTIONS.replace('"', '').split(", ")
+            return MODIFY_LIST_ACTIONS
         if MOVIE_INFORMATION_REQUEST_INTENT in intention.values() and (intention.get("information_requested")[0] is not None):
-            return MOVIE_INFO_ACTIONS.replace('"', '').split(", ")
+            return MOVIE_INFO_ACTIONS
         return False
     
     intentions: list[dict] = dialogueST.get_intentions_json()
     if DEBUG or DEBUG_LLM:
         print("DEBUG in llmSupervision")
         print("Filled JSON list to supervise:", json.dumps(intentions, indent=2))
-    other_request: str = ""
+    unsuccess: Unsuccess = Unsuccess()
     updated_intentions: list[dict] = []
-    flag: bool = False
+    invalid: bool = False
     updated: bool = False
     for intent in intentions:
         actions: list[str] = modifyOrInfo(intent)
@@ -122,7 +146,7 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
             for q in query:
                 if q not in valid_actions:
                     print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
-                    other_request = other_request + "; " + q
+                    unsuccess.add_other_request(q)
                     invalid = True
                     updated = True
                 else:
@@ -139,4 +163,7 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> str:
         dialogueST.update_intentions(updated_intentions)
     if DEBUG or DEBUG_LLM:
         print("Filled JSON list after LLM supervision:", json.dumps(intentions, indent=2))
-    return other_request
+    return unsuccess
+
+
+    

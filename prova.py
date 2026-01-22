@@ -2,7 +2,7 @@ import json
 import tmdb_api
 
 from global_variables import *
-
+from utils import Unsuccess
 
 # #Open the file and read the JSON content
 # try:
@@ -92,21 +92,22 @@ from global_variables import *
 
 # ================================================================================================
 
-dictionary = {
-    "Inception": {"year": 2010, "rate": 8.8},
-    "Interstellar": {"year": 2014, "rate": 8.6},
-    "things_I_like": ["movies", "music", "programming"],
-    "list": [None]
-}
+# dictionary = {
+#     "Inception": {"year": 2010, "rate": 8.8},
+#     "Interstellar": {"year": 2014, "rate": 8.6},
+#     "things_I_like": ["movies", "music", "programming"],
+#     "list": "TUTTO MAIUSCOLO"
+# }
 
-dictionary["Inception"]["director"] = "Christopher Nolan"
+# dictionary["Inception"]["director"] = "Christopher Nolan"
 
-# print(dictionary.get("things_I_like"))
-# print(dictionary.get("not_existing_key", "Default Value"))
-print(dictionary.get("list"))
-print(dictionary.get("list")[0])
-print(type(dictionary.get("list")))
-print(dictionary.get("list")[0] is None)
+# # print(dictionary.get("things_I_like"))
+# # print(dictionary.get("not_existing_key", "Default Value"))
+# print(dictionary.get("list"))
+# print(dictionary.get("list")[0])
+# print(type(dictionary.get("list")))
+# print(dictionary.get("list").lower())
+
 
 # ================================================================================================
 
@@ -123,3 +124,19 @@ print(dictionary.get("list")[0] is None)
 
 # ================================================================================================
 
+unsuccess: Unsuccess = Unsuccess()
+string: str = "roba varia"
+unsuccess.add_no_movie("Inception")
+unsuccess.add_other_request("Find me movies with time travel themes.")
+if isinstance(unsuccess, Unsuccess):
+    print("unsuccess is Unsuccess")
+else:
+    print("unsuccess is NOT Unsuccess")
+if isinstance(string, str):
+    print("string is str")
+else:
+    print("string is NOT str")
+if isinstance(string, Unsuccess):
+    print("string is Unsuccess")
+else:
+    print("string is NOT Unsuccess")

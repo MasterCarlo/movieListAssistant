@@ -6,6 +6,7 @@ import tmdb_api
 from global_variables import *
 from list_database import ListDatabase
 from dialogue_state_tracker import DialogueStateTracker
+from utils import Unsuccess
 
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
@@ -13,32 +14,40 @@ tmdb = tmdb_api.MovieDatabase(API_KEY)
 # TODO: capire la gerarchia delle azioni, per esempio se c'è create list e add movie alla stessa intention, prima creo la lista e poi aggiungo il film
 # TODO: fare l'azione di consiglia film e fare bene l'esecuzione delle print, tipo scrivere sure here is the list
 # Execute one single action for one single intention
-def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
+def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str | Unsuccess:
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.execute")
         print("Executing intention:", intention)
     action_performed: str = ""
     intent_type = intention.get("intent")
+    unsuccess: Unsuccess = Unsuccess()
     if intent_type == CREATE_NEW_LIST_INTENT:
         action_performed = createNewList(intention, list_db, dialogueST)
     elif intent_type == MODIFY_EXISTING_LIST_INTENT:
         action_performed = modifyList(intention, list_db)
+        if intention.get("object_title") == action_performed: # no movie was found to add/remove
+            unsuccess.add_no_movie(action_performed)
+            intention.update({"object_title": None}) # reset the object title to None to ask again later
+            return unsuccess
     elif intent_type == MOVIE_INFORMATION_REQUEST_INTENT:
         action_performed =  provideInfo(intention, list_db, dialogueST)
-        if action_performed == "":
-            if DEBUG or DEBUG_LLM:
-                print("No action performed in provideInfo.")
-            return ""
+        if intention.get("object_title") == action_performed: # no movie/tv was found
+            unsuccess.add_no_movie(action_performed)
+            intention.update({"object_title": None}) # reset the object title to None to ask again later
+            return unsuccess
     elif intent_type == SHOW_EXISTING_LIST_INTENT:
         action_performed = showExistingList(intention, list_db)
     elif intent_type == CANCEL_REQUEST_INTENT:
         action_performed = cancelRequest(intention, list_db, dialogueST)
     elif intent_type == OTHER_INTENT:
-        action_performed = handleOther(intention)
+        other_request = handleOther(intention)
+        unsuccess.add_other_request(other_request)
+        intention["fulfilled"] = True # we consider other intent fulfilled after storing the request because the action is simply answering the user we can't do it
+        return unsuccess
     else:
         print("Unknown intent type:", intent_type)
-    
+    intention["fulfilled"] = True
     return action_performed
 
 # TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
@@ -49,15 +58,15 @@ def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
         print("DEBUG in actions.createNewList")
     
     list_name: str = intention.get("list_name")
-    if list_name not in list_db.lists:
-        list_db.lists[list_name] = {}
+    if list_name.lower() not in list_db.lists:
+        list_db.lists[list_name.lower()] = {}
         print(f"Created new list '{list_name}'.")
     else:
         turn: str = f"Movie Assistant: List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')"
         print(turn)
         user_input: str = input("User: ")
         if (user_input.lower() == 'yes') or (user_input.lower() == 'y'):
-            list_db.lists[list_name] = {}
+            list_db.lists[list_name.lower()] = {}
             t: str = f"Overwritten existing list '{list_name}'."
             print(t)
             turn = turn + " " + t
@@ -72,7 +81,7 @@ def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
 
 def modifyList(intention: dict, list_db: ListDatabase) -> str:
     
-    list_name: str = intention.get("list_name")
+    list_name: str = intention.get("list_name").lower()
     actions: list[str] = intention.get("action")
     object_title: str = intention.get("object_title")
     
@@ -94,7 +103,7 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
             else:
                 print(f"'{object_title}' not found in list '{list_name}'.")
         elif action == "change title":
-            new_title: str = intention.get("object_title")
+            new_title: str = intention.get("object_title").lower()
             if list_name in list_db.lists:
                 list_db.lists[new_title] = list_db.lists.pop(list_name)
                 print(f"Changed list title from '{list_name}' to '{new_title}'.")
@@ -116,14 +125,15 @@ def provideInfo(intention: dict, list_db: ListDatabase, dialogueST: DialogueStat
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.provideInfo")
-    
     object_title: str = intention.get("object_title")
     information_requested: list[str] = intention.get("information_requested")
     search_results: list[dict] = tmdb.search_titles(object_title, num_results=1)
+    # If we don't find the movie, we return the title to inform the user later
     if not search_results:
         if DEBUG or DEBUG_LLM:
             print(f"No results found for '{object_title}'.")
         return object_title
+
     media: dict = search_results[0]  # Take the first search result
     media_id: int = media.get("id")
     media_type: str = media.get("type")
@@ -139,6 +149,8 @@ def provideInfo(intention: dict, list_db: ListDatabase, dialogueST: DialogueStat
         return "unknown media type"
     
     if not media_details:
+        if DEBUG or DEBUG_LLM:
+            print("No media details found, no action performed in provideInfo.")
         print(f"Movie Assistant: Could not retrieve details for '{object_title}'.")
         return ""
     
@@ -210,7 +222,7 @@ def provideInfo(intention: dict, list_db: ListDatabase, dialogueST: DialogueStat
 # TODO: controllare l'ordine di apparizione della stampa della lista e della risposta dell'LLM che dice ecco, ho fatto questa azione. Probabilmente sono al contrario
 def showExistingList(intention: dict, list_db: ListDatabase) -> str:
     
-    list_name: str = intention.get("list_name")
+    list_name: str = intention.get("list_name").lower()
     if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.showExistingList")
     if DEBUG:
@@ -235,6 +247,7 @@ def showExistingList(intention: dict, list_db: ListDatabase) -> str:
                 print(f"- {title}: {details}")
         else:
             print(f"List '{list_name}' does not exist.")
+            return 
     
     action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'"
     return action_performed + ";"
@@ -270,3 +283,6 @@ def handleOther(intention: dict) -> str:
     if DEBUG or DEBUG_LLM:
         print(f"Handling other intent with request: {request}")
     return request
+
+def successfulOutcome():
+    pass      
