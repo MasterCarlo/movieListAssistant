@@ -26,11 +26,11 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, no_movie: list[str], o
         elif MODIFY_EXISTING_LIST_INTENT in intention.values():
             if None in intention.values():
                 # ask for the name of the list to modify, the action and the object title
-                instruction= instruction + f"The user wants to modify an existing movie list but hasn't specified the name of the list, the action to perform (only actions possible: {MODIFY_LIST_ACTIONS}) and/or the title of the object (a movie or a series or the new name of a list). Please ask the user for these details or suggest them based on the previous conversation if possible."
+                instruction= instruction + f"The user wants to modify an existing movie list but hasn't specified the name of the list, the action to perform (only actions possible: {', '.join(MODIFY_LIST_ACTIONS)}) and/or the title of the object (a movie or a series or the new name of a list). Please ask the user for these details or suggest them based on the previous conversation if possible."
         elif MOVIE_INFORMATION_REQUEST_INTENT in intention.values():
             if None in intention.values():
                 # ask for the object of the information and the text of the request
-                instruction= instruction + f"The user has requested movie or series information but hasn't specified the object of the information (a movie or a series) and/or the specific information requested (possible options: {MOVIE_INFO_ACTIONS}). Please ask the user for these details or suggest them based on the previous conversation if possible."
+                instruction= instruction + f"The user has requested movie or series information but hasn't specified the object of the information (a movie or a series) and/or the specific information requested (possible options: {', '.join(MOVIE_INFO_ACTIONS)}). Please ask the user for these details or suggest them based on the previous conversation if possible."
         elif SHOW_EXISTING_LIST_INTENT in intention.values():
             if None in intention.values():
                 # ask for the name of the list to show
@@ -62,13 +62,12 @@ def completion(dialogueST: DialogueStateTracker, other_request: str) -> str:
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in communicateCompletion")
+    fallback_policy: str = ""
+    last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
+    if other_request != "":
+        fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + other_request
     if dialogueST.get_actions_performed() != "":
-        fallback_policy: str = ""
-        if other_request != "":
-            fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + other_request
-        last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
         instruction: str = "You are a movie list assistant, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + last_N_turns + "\". Please, inform the user that all his requests have been satisfied and if he needs further assistance." + fallback_policy + " Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else."
     else:
-        print("There is some problem in communicateCompletion")
-        return ""
+        return "You are a movie list assistant, it seems that there are no actions performed to inform the user about. This is your previous conversation with the user: \"" + last_N_turns + "\"." + fallback_policy + " Please answer the user accordingly and ask if he needs further assistance. Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else. "
     return instruction
