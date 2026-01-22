@@ -79,7 +79,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     
     
 
-
+# TODO: capire la gerarchia delle azioni, per esempio se c'è create list e add movie alla stessa intention, prima creo la lista e poi aggiungo il film
 # If there are intentions with no null slots, we fulfill them directly
 def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase) -> tuple[str, list[str], str]:
     

@@ -10,6 +10,7 @@ from dialogue_state_tracker import DialogueStateTracker
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
 
+# TODO: capire la gerarchia delle azioni, per esempio se c'è create list e add movie alla stessa intention, prima creo la lista e poi aggiungo il film
 # TODO: fare l'azione di consiglia film e fare bene l'esecuzione delle print, tipo scrivere sure here is the list
 # Execute one single action for one single intention
 def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:

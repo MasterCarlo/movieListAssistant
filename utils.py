@@ -1,70 +1,136 @@
-import subprocess
-import time
-import os
 import json
-import re
-import utils
+import os
 import subprocess
 
 from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
 
 
-# TODO: testare col debug le funzioni modify list e get movie information
-
-# We check the intentions of the user inside the json from the dialogue state tracker. 
-# Then we return a corresponding json for each intention to complete 
-def extractIntentions(json_answer: str) -> list[dict]:
-    if DEBUG:
-        print("DEBUG in extractIntentions")
-        print("JSON answer to extract intentions from:", json_answer)
-    if len(json_answer) > 3: # if it's not an empty json list "[]"
-        intentions: str = json_answer
-        intentions_list_json: list[dict] = []
-        if CREATE_NEW_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + CREATE_NEW_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        if MODIFY_EXISTING_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + MODIFY_EXISTING_LIST_INTENT + """\", "list_name": null, "action": [null], "object_title": null, "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        if SHOW_EXISTING_LIST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + SHOW_EXISTING_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        if MOVIE_INFORMATION_REQUEST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + MOVIE_INFORMATION_REQUEST_INTENT + """\", "object_title": null, "information_requested": [null], "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        if CANCEL_REQUEST_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + CANCEL_REQUEST_INTENT + """\", "intent_to_cancel": null, "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        if OTHER_INTENT in intentions:
-            intent: dict = json.loads("""{"intent":""" + """\"""" + OTHER_INTENT + """\", "text_of_the_request": null, "fulfilled": false}""")
-            intentions_list_json.append(intent)
-        
-        return intentions_list_json
-    else:
-        if DEBUG or DEBUG_LLM:
-            print("No intentions found in the JSON answer.")
-        return []
-
-
-def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracker):
-    if DEBUG or DEBUG_LLM:
-        print("DEBUG in checkForIntention")
-    user_response: str = dialogueST.get_last_user_input()
-    intentions_str: str = json.dumps(dialogueST.get_intentions_json())
-    last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". Given the current intentions of the user expressed in this json: {intentions_str}, I want you to extract, from the last user input ({user_response}), any NEW intention that is not already present in the json, they can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only actions possible: [{", ".join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{", ".join(MOVIE_INFO_ACTIONS)}]. If the user wants to know anything else, like the title of a movie, the country etc., you have to consider the intent as {OTHER_INTENT}. The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else; for example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]. Otherwise print an empty json list: []."""
-    json_intentions: str = utils.askAndReadAnswer(process, instruction)
-    if DEBUG or DEBUG_LLM:
-        print("New intentions JSON Answer received in checkForIntentions: ", json_intentions)
-    if json_intentions != "[]":
-        new_intentions_list_json: list[dict] = extractIntentions(json_intentions)
-        list_of_inte: list[dict] = dialogueST.get_intentions_json()
-        list_of_inte.extend(new_intentions_list_json)
-        dialogueST.update_intentions(list_of_inte)
-        if DEBUG or DEBUG_LLM:
-            print("Updated intentions in dialogue state tracker in checkForIntention:", json.dumps(dialogueST.get_intentions_json(), indent=2))
-    elif DEBUG or DEBUG_LLM:
-        if DEBUG or DEBUG_LLM:
-            print("No new intentions found in checkForIntention.")
+def startLLM() -> subprocess.Popen:
     
+    if DEBUG:
+        print("DEBUG mode  is ON: LLM process will not be started.")
+        return None  
+    try: 
+        command: list[str] = ["python", "-u","main.py"]
+        this_dir: str = os.path.dirname(os.path.abspath(__file__))
+        project_root: str = os.path.abspath(os.path.join(this_dir, "..", "HMD-Lab"))
+        env: dict[str, str] = os.environ.copy()
+        env["PYTHONPATH"] = project_root
+        # Start the process with separate stderr to capture errors
+        process: subprocess.Popen = subprocess.Popen(command, cwd=project_root, stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+                                                            stderr=subprocess.PIPE, text=True, bufsize=1, env=env)
+        print("Starting LLM process, please wait...")
+        if DEBUG or DEBUG_LLM:
+            print("process is:", process)
+        return process
+    except Exception as e:
+        print(f"An error occurred while starting the LLM: {e}")
+        raise
+
+
+def askAndReadAnswer(process: subprocess.Popen, instruction: str) -> str:
+    
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in askAndReadAnswer")
+        # print("Instruction sent to LLM:", instruction)
+    if DEBUG:
+        answer: str = input("LLM: ")
+        return answer
+    # We instruct the LLM with the instruction + user input
+    try:
+        # Check if process is still alive
+        if process.poll() is not None:
+            print(f"ERROR: LLM process has terminated with exit code {process.returncode}")
+            print("Process stdout before termination:")
+            remaining_stdout = process.stdout.read()
+            if remaining_stdout:
+                print(remaining_stdout)
+            print("\nProcess stderr before termination:")
+            remaining_stderr = process.stderr.read()
+            if remaining_stderr:
+                print(remaining_stderr)
+            raise RuntimeError(f"LLM process died with exit code {process.returncode}")
+        
+        process.stdin.write(instruction + "\n")
+        process.stdin.flush()
+        buffer: str = ""
+        while True:
+            ch = process.stdout.read(1)
+            if not ch:
+                if DEBUG_LLM:
+                    print("No line read, breaking")
+                break
+            buffer = buffer + ch
+            if buffer.endswith("User: "):
+                break
+        if DEBUG_LLM:
+            print("LLM answer:", buffer.strip("User: "))
+        return buffer.strip("User: ").strip("System: ").strip()
+
+
+    except Exception as e:
+        print(f"An error occurred while writing/reading to LLM stdin: {e}")
+        raise e
+
+# Transform the list of dictionary json into a string with null instead of None. it's a one line string
+# because the shell can't manage multi line text
+def jsonToString(json_list: list[dict]) -> str:
+
+    json_str: str = json.dumps(json_list, separators=(",", ":"), ensure_ascii=False)
+    return json_str
+
+# Transform a json string into a list of dict with None instead of null
+def stringToJson(json_string: str) -> list[dict]:
+    json_list: list[dict] = []
+    json_string = json_string.strip()
+    if json_string.startswith('[' or '{') and json_string.endswith(']' or '}'):
+        try:
+            json_list = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON string: {e}")
+    else:
+        print("The provided string is not a valid JSON array.")
+    return json_list
+
+# Qwen3 is stupid we need to check
+def llmSupervision(dialogueST: DialogueStateTracker) -> str:
+    
+    def modifyOrInfo(intention: dict) -> list[str] | bool:
+        if MODIFY_EXISTING_LIST_INTENT in intention.values() and (intention.get("action")[0] is not None):
+            return MODIFY_LIST_ACTIONS.replace('"', '').split(", ")
+        if MOVIE_INFORMATION_REQUEST_INTENT in intention.values() and (intention.get("information_requested")[0] is not None):
+            return MOVIE_INFO_ACTIONS.replace('"', '').split(", ")
+        return False
+    
+    intentions: list[dict] = dialogueST.get_intentions_json()
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in llmSupervision")
+        print("Filled JSON list to supervise:", json.dumps(intentions, indent=2))
+    other_request: str = ""
+    updated_intentions: list[dict] = []
+    for intent in intentions:
+        actions: list[str] = modifyOrInfo(intent)
+        if actions:
+            query: list[str] = intent.get("action", intent.get("information_requested", [])) # return the action or the information_requested
+            valid_actions: list[str] = actions
+            filtered_query: list[str] = []
+            for q in query:
+                if q not in valid_actions:
+                    print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
+                    other_request = other_request + "; " + q
+                else:
+                    filtered_query.append(q)
+            if MODIFY_EXISTING_LIST_INTENT in intent.values():
+                intent["action"] = filtered_query
+                if not intent.get("action") == [] or not intent.get("action")[0] is None:
+                    updated_intentions.append(intent)
+            else:
+                intent["information_requested"] = filtered_query
+                if (not intent.get("information_requested") == []) or (not intent.get("information_requested")[0] is None):
+                    updated_intentions.append(intent)
+    
+    dialogueST.update_intentions(updated_intentions)
+    if DEBUG or DEBUG_LLM:
+        print("Filled JSON list after LLM supervision:", json.dumps(intentions, indent=2))
+    return other_request
