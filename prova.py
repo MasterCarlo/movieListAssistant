@@ -2,7 +2,7 @@ import json
 import tmdb_api
 
 from global_variables import *
-from utils import Unsuccess
+from natural_language_generator import Unsuccess
 
 #Open the file and read the JSON content
 try:

@@ -4,34 +4,7 @@ import subprocess
 
 from global_variables import *
 from dialogue_state_tracker import DialogueStateTracker
-
-# I use it like a C struct
-class Unsuccess:
-    def __init__(self):
-        self.no_movie: list[str] = [] # list of movie titles not found
-        self.no_list: list[str] = [] # list of list names not found
-        self.other_request: list[str] = [] # text of out of bound requests (i.e. asking for movie country)
-    def add_no_movie(self, title: str):
-        self.no_movie.append(title)
-    def add_no_list(self, list_name: str):
-        self.no_list.append(list_name)
-    def add_other_request(self, request: str):
-        self.other_request.append(request)
-    def get_no_movie(self) -> list[str]:
-        return self.no_movie
-    def get_no_list(self) -> list[str]:
-        return self.no_list
-    def get_other_request(self) -> list[str]:
-        return self.other_request
-    def clear(self):
-        self.no_movie = []
-        self.no_list = []
-        self.other_request = []
-    def merge(self, other: 'Unsuccess'):
-        self.no_movie.extend(other.get_no_movie())
-        self.no_list.extend(other.get_no_list())
-        self.other_request.extend(other.get_other_request())
-
+from natural_language_generator import Unsuccess
 
 def startLLM() -> subprocess.Popen:
     
@@ -122,8 +95,7 @@ def stringToJson(json_string: str) -> list[dict]:
         print("The provided string is not a valid JSON array.")
     return json_list
 
-# TODO: move this function to natural_language_understander.py
-#TODO: check if all the intents are legitimate
+
 # Qwen3 is stupid we need to check
 def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
     
@@ -143,6 +115,12 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
     invalid: bool = False
     updated: bool = False
     for intent in intentions:
+        if intent.get("intent") not in [CREATE_NEW_LIST_INTENT, MODIFY_EXISTING_LIST_INTENT, SHOW_EXISTING_LIST_INTENT, MOVIE_INFORMATION_REQUEST_INTENT, CANCEL_REQUEST_INTENT, OTHER_INTENT]:
+            if DEBUG or DEBUG_LLM:
+                print(f"LLM supervision: intent '{intent.get('intent')}' is not valid. Dropping it.")
+            unsuccess.add_other_request(intent.get("intent"))
+            updated = True
+            continue # skip invalid intents
         intent["fulfilled"] = False # reset fulfilled to false in case of QWEN3 being stupid
         actions: list[str] = modifyOrInfo(intent)
         invalid = False
