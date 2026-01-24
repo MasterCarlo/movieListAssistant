@@ -8,7 +8,7 @@ from dialogue_state_tracker import DialogueStateTracker
 from natural_language_generator import Unsuccess
 from list_database import ListDatabase
 
-# TODO: aggiungere a tutte le instruction le liste già esistenti
+
 def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, unsuccess: Unsuccess, list_db: ListDatabase) -> str | None:
 
     if DEBUG or DEBUG_LLM:
@@ -40,7 +40,7 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     existing_lists: str = ""
     if list_db.get_all_lists() != {}:
         existing_lists = ALL_LISTS + list_db.get_all_lists().keys().__str__() + "."
-    instruction: str = f"""You are a movie list assistant, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT}, {CANCEL_REQUEST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. If the user asks something else, his intent must be classified as [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: [{', '.join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{', '.join(MOVIE_INFO_ACTIONS)}]. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. {existing_lists}. This is the content of your previous conversation with the user:" {last_N_turns}". Use the content of that conversation to fill the null slots, and ONLY the NULL slots, inside this json file: {json_to_fill}. Be aware of typing errors of the user. If you don't find the information to fill a slot, leave it as null. Print ONLY this JSON file: {json_to_fill}, but with the nulls filled with the information you got, and NOTHING ELSE after."""
+    instruction: str = f"""You are a movie list assistant, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT}, {CANCEL_REQUEST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. If the user asks something else, his intent must be classified as [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: [{', '.join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{', '.join(MOVIE_INFO_ACTIONS)}]. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. {existing_lists}. This is the content of your previous conversation with the user:" {last_N_turns}". Use the content of that conversation to fill the null slots inside this json file: {json_to_fill}. Be aware of typing errors of the user. If you think that some filled slots were filled incorrectly, feel free to fill them with the correct value, but be careful. If you don't find the information to fill a slot, leave it as null. Print ONLY this JSON file: {json_to_fill}, but with the null slots filled with the information you got and, if necessary, with the changed values for corrections, and NOTHING ELSE after."""
     filled_json: str = utils.askAndReadAnswer(process, instruction)
     filled_json_list: list[dict] = utils.stringToJson(filled_json)
     dialogueST.update_intentions(filled_json_list)
@@ -107,7 +107,7 @@ def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracke
         new_intentions_json: list[dict] = extractIntentions(json_intentions)
         old_intentions: list[dict] = dialogueST.get_intentions_json()
         old_intentions.extend(new_intentions_json)
-        dialogueST.update_intentions(old_intentions) # its confusing that i update with old intentions and not new intentions, TODO: change that
+        dialogueST.update_intentions(old_intentions) # its confusing that i update with old intentions and not new intentions
         if DEBUG or DEBUG_LLM:
             print("Updated intentions in dialogue state tracker in checkForIntention:", json.dumps(dialogueST.get_intentions_json(), indent=2))
     elif DEBUG or DEBUG_LLM:

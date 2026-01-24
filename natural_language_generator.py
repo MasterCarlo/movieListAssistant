@@ -76,7 +76,8 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, unsuccess: Unsuccess, 
                 other.append(request)
             else:
                 print("The other intent text of the request is empty.")
-    # TODO: guardare nei json gli other intent perchè forse sono doppi, potrei averli sia in unsuccess che nelle intentions
+
+
     fallback_policy: str = ""
     if len(other) > 0:
         fallback_policy = FALLBACK_POLICY + "This are the request(s): " + "; ".join(other) + "; " + "; ".join(unsuccess.get_other_request())

@@ -1,4 +1,4 @@
-# The dialogue manager chooses the next best action TODO aggiungi una descrizione migliore 
+# The dialogue manager chooses the next best action 
 
 import json
 import subprocess
@@ -58,7 +58,6 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
         nlu.checkForIntention(process, dialogueST )
 
 
-# TODO: capire la gerarchia delle azioni, per esempio se c'è create list e add movie alla stessa intention, prima creo la lista e poi aggiungo il film
 # If there are intentions with no null slots, we fulfill them directly
 def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase, unsuccess: Unsuccess) -> tuple[str, Unsuccess]:
     
@@ -66,6 +65,11 @@ def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase, unsuc
         print("DEBUG in fulfillIntent.")
         print("Intentions before fulfilling in fulfillIntent: ", json.dumps(dialogueST.get_intentions_json(), indent=2))
     actions_performed: str = "" # A written report of what action the LLM has completed
+    intent_order = [CANCEL_REQUEST_INTENT, CREATE_NEW_LIST_INTENT, MODIFY_EXISTING_LIST_INTENT,
+                    SHOW_EXISTING_LIST_INTENT, MOVIE_INFORMATION_REQUEST_INTENT, OTHER_INTENT]
+    order_index = {intent: i for i, intent in enumerate(intent_order)}
+    sorted_intentions: list[dict] = sorted(dialogueST.get_intentions_json(), key=lambda x: order_index.get(x.get("intent"), len(intent_order)))
+    dialogueST.update_intentions(sorted_intentions)
     for intention in dialogueST.get_intentions_json(): 
         if None not in intention.values() and intention.get("fulfilled") == False:
             outcome: str | Unsuccess = actions.execute(intention, list_db, dialogueST)
