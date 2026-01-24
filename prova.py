@@ -4,24 +4,24 @@ import tmdb_api
 from global_variables import *
 from utils import Unsuccess
 
-# #Open the file and read the JSON content
-# try:
-#     with open("intent_json_examples.json", "r") as file:
-#         data = json.load(file)
-# except FileNotFoundError:
-#     print("Error: intent_json_examples.json not found.")
-#     exit(1)
-# except json.JSONDecodeError:
-#     print("Error: Invalid JSON format.")
-#     exit(1)
+#Open the file and read the JSON content
+try:
+    with open("intent_json_examples.json", "r") as file:
+        data = json.load(file)
+except FileNotFoundError:
+    print("Error: intent_json_examples.json not found.")
+    exit(1)
+except json.JSONDecodeError:
+    print("Error: Invalid JSON format.")
+    exit(1)
 
-# # Print the data to check the contents
+# Print the data to check the contents
 
-# def json_to_single_line_string(data):
-#     """
-#     Convert a loaded JSON object into a one-line printable JSON string.
-#     """
-#     return json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+def json_to_single_line_string(data):
+    """
+    Convert a loaded JSON object into a one-line printable JSON string.
+    """
+    return json.dumps(data, separators=(",", ":"), ensure_ascii=False)
 
 # print("these are the data\n" + json.dumps(data, indent=2))
 # string = json_to_single_line_string(data)
@@ -124,19 +124,19 @@ from utils import Unsuccess
 
 # ================================================================================================
 
-unsuccess: Unsuccess = Unsuccess()
-string: str = "roba varia"
-unsuccess.add_no_movie("Inception")
-unsuccess.add_other_request("Find me movies with time travel themes.")
-if isinstance(unsuccess, Unsuccess):
-    print("unsuccess is Unsuccess")
-else:
-    print("unsuccess is NOT Unsuccess")
-if isinstance(string, str):
-    print("string is str")
-else:
-    print("string is NOT str")
-if isinstance(string, Unsuccess):
-    print("string is Unsuccess")
-else:
-    print("string is NOT Unsuccess")
+# unsuccess: Unsuccess = Unsuccess()
+# string: str = "roba varia"
+# unsuccess.add_no_movie("Inception")
+# unsuccess.add_other_request("Find me movies with time travel themes.")
+# if isinstance(unsuccess, Unsuccess):
+#     print("unsuccess is Unsuccess")
+# else:
+#     print("unsuccess is NOT Unsuccess")
+# if isinstance(string, str):
+#     print("string is str")
+# else:
+#     print("string is NOT str")
+# if isinstance(string, Unsuccess):
+#     print("string is Unsuccess")
+# else:
+#     print("string is NOT Unsuccess")

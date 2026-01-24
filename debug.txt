@@ -1,5 +1,5 @@
-LLM: ciao coglione
-User: ciao, voglio una pizza, sapere il coglione che ha diretto quel film, e stampare la lista dei film visti
+LLM: ciao user. sono un agente ai
+User: ciao, voglio una pizza, sapere chi ha diretto quel film, e stampare la lista dei film visti
 LLM: [{"intention": "movie or series information request"}, {"intention": "show existing list"}, {"intention": "other"}]            
 
 
@@ -13,6 +13,6 @@ Hi, my name is Carlo. I'd like to know the title of that movie with the bunnies 
 
 What can you tell me about the dark knight?
 
-Hi I want to create a new list
-Can you add to that list "The dark knight rises"? Thank you 
-Can you show me the list good movies?
+Hi I want to create a new list called good movies
+can you add the dark knight rises to the list? and also Avatar
+Thank you. Can you show me the list good movies?

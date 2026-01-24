@@ -102,7 +102,11 @@ def modifyList(intention: dict, list_db: ListDatabase) -> str:
     
     for action in actions:
         if action == "add object":
-            av_object: dict = tmdb.search_movies(object_title, num_results=1)[0] # av_object is audio video object, can be tv or movie
+            av_object: list[dict] = tmdb.search_titles(object_title, num_results=1) # av_object is audio video object, can be tv or movie
+            if not av_object:
+                if DEBUG or DEBUG_LLM:
+                    print(f"No results found for '{object_title}'.")
+                return object_title
             list_db.lists[list_name][object_title] = av_object
             print(f"Added '{object_title}' to list '{list_name}'.")
         elif action == "remove object":
@@ -254,6 +258,7 @@ def showExistingList(intention: dict, list_db: ListDatabase) -> str:
             print(f"Contents of list '{list_name}':")
             for title, details in movie_list.items():
                 print(f"- {title}: {details}")
+            tmdb._print_media_info()
         else:
             print(f"List '{list_name}' does not exist.")
             return 

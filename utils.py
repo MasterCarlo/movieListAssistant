@@ -36,8 +36,10 @@ class Unsuccess:
 def startLLM() -> subprocess.Popen:
     
     if DEBUG:
-        print("DEBUG mode  is ON: LLM process will not be started.")
-        return None  
+        print("DEBUG mode is ON: LLM process will not be started.")
+        return None 
+    if DEBUG_LLM:
+        print("DEBUG_LLM mode is ON: starting LLM process...")
     try: 
         command: list[str] = ["python", "-u","main.py"]
         this_dir: str = os.path.dirname(os.path.abspath(__file__))
@@ -121,6 +123,7 @@ def stringToJson(json_string: str) -> list[dict]:
     return json_list
 
 # TODO: move this function to natural_language_understander.py
+#TODO: check if all the intents are legitimate
 # Qwen3 is stupid we need to check
 def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
     
@@ -140,20 +143,24 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
     invalid: bool = False
     updated: bool = False
     for intent in intentions:
+        intent["fulfilled"] = False # reset fulfilled to false in case of QWEN3 being stupid
         actions: list[str] = modifyOrInfo(intent)
         invalid = False
         if actions:
-            query: list[str] = intent.get("action", intent.get("information_requested", [])) # return the action or the information_requested
+            query: list[str] = intent.get("action", intent.get("information_requested", [])) # return to query the action or the information_requested
             valid_actions: list[str] = actions
             filtered_query: list[str] = []
+            repair: str | bool = False
             for q in query:
-                if q not in valid_actions:
-                    print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
+                if repair := repairAction(q, valid_actions): # if q is a valid action or a substring of it (meaning QWEN3 fked up but not so much, es: "director" instead if "get director")
+                    filtered_query.append(repair)
+                    updated = True
+                else: # if q is not  avalid action at all
+                    if DEBUG or DEBUG_LLM:
+                        print(f"LLM supervision: action '{q}' is not valid. Deleting it.")
                     unsuccess.add_other_request(q)
                     invalid = True
                     updated = True
-                else:
-                    filtered_query.append(q)
             if MODIFY_EXISTING_LIST_INTENT in intent.values():
                 intent["action"] = filtered_query
                 if (not invalid) or ((not intent.get("action") == []) and (not intent.get("action") is None)): # if after filtering it's not empty we keep it, else we drop it because it was a fully invalid request. If it was already empty (invalid == False) we keep it to ask the user later
@@ -168,5 +175,9 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
         print("Filled JSON list after LLM supervision:", json.dumps(intentions, indent=2))
     return unsuccess
 
-
-    
+# Try to find the closest action in valid_actions to query for now we do a simple substring match
+def repairAction(query: str, valid_actions: list[str]) -> str | bool:
+    for action in valid_actions:
+        if query in action or action in query:
+            return action
+    return False

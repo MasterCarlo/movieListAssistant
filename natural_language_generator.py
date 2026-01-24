@@ -50,11 +50,11 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) 
     fallback_policy: str = ""
     if len(other) > 0:
         fallback_policy = FALLBACK_POLICY + "This are the request(s): " + "; ".join(other) + "; " + "; ".join(unsuccess.get_other_request())
-    if len(unsuccess.get_no_movie) > 0:
-        no_movies: str = "; ".join(unsuccess.get_no_movie)
+    if len(unsuccess.get_no_movie()) > 0:
+        no_movies: str = "; ".join(unsuccess.get_no_movie())
         fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."    
-    if len(unsuccess.get_no_list) > 0:
-        no_lists: str = "; ".join(unsuccess.get_no_list)
+    if len(unsuccess.get_no_list()) > 0:
+        no_lists: str = "; ".join(unsuccess.get_no_list())
         fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     instruction = instruction + fallback_policy + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
     unsuccess.clear()
@@ -69,11 +69,11 @@ def completion(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) -> str:
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
     if len(unsuccess.get_other_request()) > 0:
         fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + "; ".join(unsuccess.get_other_request())
-    if len(unsuccess.get_no_movie) > 0:
-        no_movies: str = "; ".join(unsuccess.get_no_movie)
+    if len(unsuccess.get_no_movie()) > 0:
+        no_movies: str = "; ".join(unsuccess.get_no_movie())
         fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."
-    if len(unsuccess.get_no_list) > 0:
-        no_lists: str = "; ".join(unsuccess.get_no_list)
+    if len(unsuccess.get_no_list()) > 0:
+        no_lists: str = "; ".join(unsuccess.get_no_list())
         fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     if dialogueST.get_actions_performed() != "":
         instruction: str = "You are a movie list assistant, you helped the user with all his requests. These are the actions you have completed: " + dialogueST.get_actions_performed() + ". This is your previous conversation with the user: \"" + last_N_turns + "\". Please, inform the user that all his requests have been satisfied and if he needs further assistance." + fallback_policy + " Print ONLY what you want to say to the user, like you are talking to him directly, and NOTHING else."

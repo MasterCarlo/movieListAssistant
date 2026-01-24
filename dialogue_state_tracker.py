@@ -1,6 +1,6 @@
 #This is the dialogue state tracker object, takes care also of the MEMORY (last N turns)
 
-N: int = 7 # number of turns to keep in memory
+N: int = 10 # number of turns to keep in memory
 
 class DialogueStateTracker:
     def __init__(self):
@@ -37,5 +37,3 @@ class DialogueStateTracker:
     
     def get_actions_performed(self) -> str:
         return self.actions_performed
-
-# TODO: controllare che in tutti i file ci sia actions e non action
