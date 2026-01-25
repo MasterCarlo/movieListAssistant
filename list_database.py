@@ -1,3 +1,5 @@
+from global_variables import *
+
 class ListDatabase:
     def __init__(self):
         self.lists: dict[str, dict] = {}
@@ -6,3 +8,6 @@ class ListDatabase:
         return self.lists.get(list_name, None)
     def get_all_lists(self) -> dict[str, dict]:
         return self.lists
+
+Un_king = CHRISTIAN_PHRASE
+Una_figata = CHRISTIAN_SONG

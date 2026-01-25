@@ -6,7 +6,8 @@ from dialogue_state_tracker import DialogueStateTracker
 from list_database import ListDatabase
 from global_variables import *
 
-# TODO: inserire dei counter nei json perchè se una intention è lì da 6 interazioni a sto punto cancelliamola
+
+# TODO: scrivere nei prompt che il sistema deve essere educato e gentile con l'utente e adattarsi a lui
 dialogueST: DialogueStateTracker = DialogueStateTracker()
 list_db: ListDatabase = ListDatabase()
 process: subprocess.Popen = first_interaction.runFirstInteraction(dialogueST)

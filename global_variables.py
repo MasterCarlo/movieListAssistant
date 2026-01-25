@@ -1,6 +1,6 @@
 #DEBUG
 DEBUG: bool = False
-DEBUG_LLM: bool = True
+DEBUG_LLM: bool = False
 
 # INTENTS
 CREATE_NEW_LIST_INTENT: str = "create new list"
@@ -19,3 +19,7 @@ FALLBACK_POLICY: str = "The user has made a request that exceeds your expertise.
 
 # LISTS
 ALL_LISTS: str = "Be aware, when you answer, that these are the already created lists: "
+
+# CHRISTIAN
+CHRISTIAN_PHRASE: str = "CHRISSTIAAANNNN"
+CHRISTIAN_SONG: str = "https://drive.google.com/file/d/13BmQDFqmN6HZ5RxZZpi98mKfbqYjSeki/view?usp=drive_link"
