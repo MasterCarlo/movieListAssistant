@@ -46,9 +46,6 @@ def runFirstInteraction(dialogueST: DialogueStateTracker) -> subprocess.Popen:
         json_intentions: str = utils.askAndReadAnswer(process, instruction) # we instruct the LLM, with the user input, on how to behave. He should give us the json file with the intentions
         if DEBUG or DEBUG_LLM:
             print("JSON Answer received in first interaction: ", json_intentions)
-
-        # maybe first we have to extract the json from the llm (if he says some bullshit like "for sure, here is the json: {...}")
-        # marzolajsonextraction
     
     except subprocess.CalledProcessError as e:
         print("Error occurred while executing the command:")

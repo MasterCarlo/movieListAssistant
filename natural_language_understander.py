@@ -9,6 +9,7 @@ from natural_language_generator import Unsuccess
 from list_database import ListDatabase
 
 
+# We fill the null slots in the intentions json using the conversation history 
 def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTracker, list_db: ListDatabase) -> str:
     
     if DEBUG or DEBUG_LLM:

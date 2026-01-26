@@ -13,9 +13,8 @@ from natural_language_generator import Unsuccess
 from global_variables import *
 
 
-# We respond to the user. First we must understand what is null in the json intentions. Then we must understand 
-# if we can fill the nulls with the current information or if we need more information (that we will ask 
-# to the the user), then we generate an appropriate response
+# We respond to the user. First we understand if we can fill the nulls with the current information or if we need more information
+# (that we will ask to the the user), then, based on the last user input we generate an appropriate response
 def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase, process: subprocess.Popen):
 
     if DEBUG or DEBUG_LLM:
@@ -44,7 +43,8 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
             if user_response:
                 nlu.checkForIntention(process, dialogueST)
         else:
-            print("No null slots to fill")
+            if DEBUG or DEBUG_LLM:
+                print("No null slots to fill")
     else: # All intentions have been fulfilled
         if DEBUG or DEBUG_LLM:
             print("All intentions have been fulfilled.")
@@ -106,5 +106,6 @@ def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, u
             print("Filled JSON after asking user in fillNullSlots: ", json.dumps(dialogueST.get_intentions_json(), indent=2))
         return userResponse
     else:
-        print("All null slots have been filled.")
+        if DEBUG or DEBUG_LLM:
+            print("All null slots have been filled.")
         return None

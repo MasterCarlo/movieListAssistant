@@ -42,8 +42,9 @@ pip install -r requirements.txt
 export TMDB_API_KEY=your_api_key
 
 # Run
-python "main (2).py"
+python "main.py"
 ```
+If the DEBUG variable in global_variables.py is set to True, the system doesn't start the LLM, and the LLM role is taken by you. In addition, a lot of values are printed during execution to ease the debug process. If the variable DEBUG_LLM is set to True, the LLM starts and the values are printed as with DEBUG. To see the instruction passed to the LLM, after setting DEBUG_LLM to True uncomment print("Instruction sent to LLM:", instruction), line 38 of utils.py.
 
 ## Example Dialogue
 
