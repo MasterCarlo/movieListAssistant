@@ -90,7 +90,7 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, unsuccess: Unsuccess, 
     existing_lists: str = ""
     if len(list_db.get_all_lists()) > 0:
         existing_lists = ALL_LISTS + list_db.get_all_lists().keys().__str__() + "."
-    instruction = instruction + existing_lists + fallback_policy + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else."
+    instruction = instruction + existing_lists + fallback_policy + "This is the content of your previous conversation with the user: \"" + last_N_turns + "\".  This is the json file you are trying to fill: " + json_to_fill + " . Print only what you want to say to the user, like you are talking to him directly, and NOTHING else. Be kind and adapt to the user personality"
     unsuccess.clear()
     return instruction
 

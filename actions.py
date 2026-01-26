@@ -68,7 +68,9 @@ def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
     else:
         turn: str = f"Movie Assistant: List '{list_name}' already exists, do you want to overwrite it? (type 'yes' or 'no')"
         print(turn)
+        dialogueST.add_turn(turn)
         user_input: str = input("User: ")
+        dialogueST.add_turn(user_input)
         if (user_input.lower() == 'yes') or (user_input.lower() == 'y'):
             list_db.lists[list_name.lower()] = {}
             t: str = f"Overwritten existing list '{list_name}'."
@@ -78,7 +80,7 @@ def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
             t: str = f"Did not overwrite existing list '{list_name}'."
             print(t)
             turn = turn + " " + t
-        dialogueST.add_turn(turn)
+            return f"List '{list_name}' already exists, it wasn't overwritten; "    
     action_performed: str = f"{CREATE_NEW_LIST_INTENT} with list name '{list_name}'"
     return action_performed + ";"
 

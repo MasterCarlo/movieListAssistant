@@ -35,7 +35,7 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
         if(any(None in intention.values() for intention in dialogueST.get_intentions_json())): # we search for None instead of null because of python json format
             if DEBUG or DEBUG_LLM:
                 print("There are null slots to fill, we will ask the LLM to fill them.")
-            user_response: str | None = nlu.fillNullSlots(dialogueST, process, unsuccess, list_db)
+            user_response: str | None = fillNullSlots(dialogueST, process, unsuccess, list_db)
             result: tuple[str, Unsuccess] = fulfillIntent(dialogueST, list_db, unsuccess)
             actions_performed = actions_performed + result[0]
             dialogueST.update_actions(actions_performed)
@@ -89,3 +89,22 @@ def fulfillIntent(dialogueST: DialogueStateTracker, list_db: ListDatabase, unsuc
         print("Unfulfilled intentions after cleaning in fulfillIntent: ", unfulfilled_intentions)
     dialogueST.update_intentions(unfulfilled_intentions)
     return actions_performed, unsuccess
+
+def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, unsuccess: Unsuccess, list_db: ListDatabase) -> str | None:
+
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in fillNullSlots.")
+    # Check if there are still null slots 
+    if (any(None in intention.values() for intention in dialogueST.get_intentions_json())):
+        userResponse: str = ""
+        userResponse = nlg.askUser(process, dialogueST, unsuccess)
+        if DEBUG or DEBUG_LLM:
+            print("User response received in fillNullSlots: ", userResponse)
+        # Now the user answer is part of our current info
+        nlu.fillWithCurrentInfo(process, dialogueST, list_db)
+        if DEBUG or DEBUG_LLM:
+            print("Filled JSON after asking user in fillNullSlots: ", json.dumps(dialogueST.get_intentions_json(), indent=2))
+        return userResponse
+    else:
+        print("All null slots have been filled.")
+        return None

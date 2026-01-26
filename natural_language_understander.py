@@ -9,26 +9,6 @@ from natural_language_generator import Unsuccess
 from list_database import ListDatabase
 
 
-def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, unsuccess: Unsuccess, list_db: ListDatabase) -> str | None:
-
-    if DEBUG or DEBUG_LLM:
-        print("DEBUG in fillNullSlots.")
-    # Check if there are still null slots 
-    if (any(None in intention.values() for intention in dialogueST.get_intentions_json())):
-        userResponse: str = ""
-        userResponse = nlg.askUser(process, dialogueST, unsuccess)
-        if DEBUG or DEBUG_LLM:
-            print("User response received in fillNullSlots: ", userResponse)
-        # Now the user answer is part of our current info
-        fillWithCurrentInfo(process, dialogueST, list_db)
-        if DEBUG or DEBUG_LLM:
-            print("Filled JSON after asking user in fillNullSlots: ", json.dumps(dialogueST.get_intentions_json(), indent=2))
-        return userResponse
-    else:
-        print("All null slots have been filled.")
-        return None
-
-
 def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTracker, list_db: ListDatabase) -> str:
     
     if DEBUG or DEBUG_LLM:
