@@ -97,7 +97,7 @@ def fillNullSlots(dialogueST: DialogueStateTracker, process: subprocess.Popen, u
     # Check if there are still null slots 
     if (any(None in intention.values() for intention in dialogueST.get_intentions_json())):
         userResponse: str = ""
-        userResponse = nlg.askUser(process, dialogueST, unsuccess)
+        userResponse = nlg.askUser(process, dialogueST, unsuccess, list_db)
         if DEBUG or DEBUG_LLM:
             print("User response received in fillNullSlots: ", userResponse)
         # Now the user answer is part of our current info

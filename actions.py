@@ -11,8 +11,6 @@ from utils import Unsuccess
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
 
-# TODO: capire la gerarchia delle azioni, per esempio se c'è create list e add movie alla stessa intention, prima creo la lista e poi aggiungo il film
-# TODO: fare l'azione di consiglia film e fare bene l'esecuzione delle print, tipo scrivere sure here is the list
 # Execute one single action for one single intention
 def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str | Unsuccess:
     
@@ -54,8 +52,7 @@ def execute(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTra
     intention["fulfilled"] = True # The action has been successful, the intention has been fulfilled
     return action_performed
 
-# TODO: ricordarsi che se uno nella stessa intentions vuole creare una lista e aggiungere un film, 
-# prima bisogna creare la lista e poi aggiungere il film (che va su modify list come intention)
+
 def createNewList(intention: dict, list_db: ListDatabase, dialogueST: DialogueStateTracker) -> str:
     
     if DEBUG or DEBUG_LLM:

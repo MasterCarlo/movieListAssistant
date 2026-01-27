@@ -118,14 +118,14 @@ def completion(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) -> str:
     return instruction
 
 
-def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, unsuccess: Unsuccess) -> str:
+def askUser(process: subprocess.Popen, dialogueST: DialogueStateTracker, unsuccess: Unsuccess, list_db: ListDatabase) -> str:
     
     if DEBUG or DEBUG_LLM:
         print("DEBUG in askUser")
     instruction: str = ""
     # We generate the question for the user for more information. Inside the question there is also the 
     # communication of previously performed actions or failure to fulfill something out of boundaries
-    instruction= generateLLMResponse(dialogueST, unsuccess)
+    instruction= generateLLMResponse(dialogueST, unsuccess, list_db)
     llmAnswer: str = utils.askAndReadAnswer(process, instruction) # the LLM actually asks the user something. It also communicate any action performed so far and any fallback policy (if the user requested something outside the boundaries of the system)
     print("Movie Assistant:", llmAnswer)
     # If the user had an other intent, we already answered him that we can't handle it, so we fulfilled it. 

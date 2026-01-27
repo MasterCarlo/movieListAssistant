@@ -19,5 +19,3 @@ Thank you. Can you show me the list good movies?
 
 
 TODO: dire a gpt di rifrasare queste:
-{Dialogue State Tracker:} Stores the current intentions, the action performed so far that are still not communicated to the user and the chronology of the conversation. It is updated constantly
-{System start:} In \texttt{main.py} the systems starts running \texttt{runFirstInteraction()}, taking care of the first turn, since it is a little different: it prints the greetings, there are no previous interactions, so no previous intentions and no chronology. It captures the user input and it generates a for each different user intent a json strucutre with empty slots. The main then enters in a loop where it keeps calling \texttt{dialogue_manager.followupInteraction()}.
