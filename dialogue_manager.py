@@ -41,7 +41,7 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
             # After filling the null slots, we check if there are new intentions from the user response.
             # If present, in the next interaction we will take care of them
             if user_response:
-                nlu.checkForIntention(process, dialogueST)
+                nlu.checkForIntention(process, dialogueST, list_db)
         else:
             if DEBUG or DEBUG_LLM:
                 print("No null slots to fill")
@@ -55,7 +55,7 @@ def followupInteraction(dialogueST: DialogueStateTracker, list_db: ListDatabase,
         user_response: str = input("User: ")
         dialogueST.update_last_user_input(user_response)
         dialogueST.add_turn("User: " + user_response)
-        nlu.checkForIntention(process, dialogueST )
+        nlu.checkForIntention(process, dialogueST, list_db)
 
 
 # If there are intentions with no null slots, we fulfill them directly
