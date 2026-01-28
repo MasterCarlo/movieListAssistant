@@ -86,7 +86,7 @@ def jsonToString(json_list: list[dict]) -> str:
 def stringToJson(json_string: str) -> list[dict]:
     json_list: list[dict] = []
     json_string = json_string.strip()
-    if json_string.startswith('[' or '{') and json_string.endswith(']' or '}'):
+    if (json_string.startswith('[') or json_string.startswith('{')) and (json_string.endswith(']') or json_string.endswith('}')):
         try:
             json_list = json.loads(json_string)
         except json.JSONDecodeError as e:
@@ -98,7 +98,7 @@ def stringToJson(json_string: str) -> list[dict]:
 
 # Qwen3 is stupid we need to check
 def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
-    
+    # If the intention is MODIFY_EXISTING_LIST_INTENT or MOVIE_INFORMATION_REQUEST_INTENT and the action/information_requested is not null
     def modifyOrInfo(intention: dict) -> list[str] | bool:
         if MODIFY_EXISTING_LIST_INTENT in intention.values() and (intention.get("action")[0] is not None):
             return MODIFY_LIST_ACTIONS
@@ -124,7 +124,7 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
         intent["fulfilled"] = False # reset fulfilled to false in case of QWEN3 being stupid
         actions: list[str] = modifyOrInfo(intent)
         invalid = False
-        if actions:
+        if actions: # if it's MODIFY_EXISTING_LIST_INTENT or MOVIE_INFORMATION_REQUEST_INTENT with non null action/information_requested
             query: list[str] = intent.get("action", intent.get("information_requested", [])) # return to query the action or the information_requested
             valid_actions: list[str] = actions
             filtered_query: list[str] = []
@@ -147,6 +147,8 @@ def llmSupervision(dialogueST: DialogueStateTracker) -> Unsuccess:
                 intent["information_requested"] = filtered_query
                 if (not invalid) or ((not intent.get("information_requested") == []) and (not intent.get("information_requested") is None)): # if after filtering it's not empty we keep it, else we drop it because it was a fully invalid request. If it was already empty (invalid == False) we keep it to ask the user later
                     updated_intentions.append(intent)
+        else:
+            updated_intentions.append(intent)
     if updated:
         dialogueST.update_intentions(updated_intentions)
     if DEBUG or DEBUG_LLM:

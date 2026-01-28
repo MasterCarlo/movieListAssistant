@@ -44,6 +44,7 @@ def runFirstInteraction(dialogueST: DialogueStateTracker) -> subprocess.Popen:
         dialogueST.update_last_user_input(user_input)
         dialogueST.add_turn("User: " + user_input) # Update the turns of dialogue state tracker with the user input
         json_intentions: str = utils.askAndReadAnswer(process, instruction) # we instruct the LLM, with the user input, on how to behave. He should give us the json file with the intentions
+        json_intentions = nlu.jsonUnderstander(process, json_intentions)
         if DEBUG or DEBUG_LLM:
             print("JSON Answer received in first interaction: ", json_intentions)
     

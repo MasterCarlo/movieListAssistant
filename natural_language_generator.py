@@ -19,10 +19,16 @@ class Unsuccess:
     def add_other_request(self, request: str):
         self.other_request.append(request)
     def get_no_movie(self) -> list[str]:
+        if (self.no_movie is None) or (len(self.no_movie) == 0) or (self.no_movie[0] is None) or (self.no_movie == []):
+            return [""]
         return self.no_movie
     def get_no_list(self) -> list[str]:
+        if (self.no_list is None) or (len(self.no_list) == 0) or (self.no_list[0] is None) or (self.no_list == []):
+            return [""]
         return self.no_list
     def get_other_request(self) -> list[str]:
+        if (self.other_request is None) or (len(self.other_request) == 0) or (self.other_request[0] is None) or (self.other_request == []):
+            return [""]
         return self.other_request
     def clear(self):
         self.no_movie = []
@@ -79,12 +85,12 @@ def generateLLMResponse(dialogueST: DialogueStateTracker, unsuccess: Unsuccess, 
 
 
     fallback_policy: str = ""
-    if len(other) > 0:
+    if len(other) > 0 and other[0] != "":
         fallback_policy = FALLBACK_POLICY + "This are the request(s): " + "; ".join(other) + "; " + "; ".join(unsuccess.get_other_request())
-    if len(unsuccess.get_no_movie()) > 0:
+    if unsuccess.get_no_movie()[0] != '' and len(unsuccess.get_no_movie()) > 0:
         no_movies: str = "; ".join(unsuccess.get_no_movie())
         fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."    
-    if len(unsuccess.get_no_list()) > 0:
+    if unsuccess.get_no_list()[0] != '' and len(unsuccess.get_no_list()) > 0:
         no_lists: str = "; ".join(unsuccess.get_no_list())
         fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     existing_lists: str = ""
@@ -101,12 +107,12 @@ def completion(dialogueST: DialogueStateTracker, unsuccess: Unsuccess) -> str:
         print("DEBUG in communicateCompletion")
     fallback_policy: str = ""
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    if len(unsuccess.get_other_request()) > 0:
+    if unsuccess.get_other_request()[0] != '' and len(unsuccess.get_other_request()) > 0:
         fallback_policy = FALLBACK_POLICY + "This is the text of the request(s): " + "; ".join(unsuccess.get_other_request())
-    if len(unsuccess.get_no_movie()) > 0:
+    if unsuccess.get_no_movie()[0] != '' and len(unsuccess.get_no_movie()) > 0:
         no_movies: str = "; ".join(unsuccess.get_no_movie())
         fallback_policy = fallback_policy + " Tell the user that you were not able to find any movie or series with the given title(s): " + no_movies + ". Ask him if those are the correct titles."
-    if len(unsuccess.get_no_list()) > 0:
+    if unsuccess.get_no_list()[0] != '' and len(unsuccess.get_no_list()) > 0:
         no_lists: str = "; ".join(unsuccess.get_no_list())
         fallback_policy = fallback_policy + " Tell the user that the following list(s) do not exist: " + no_lists + ". Ask him if those are the correct list names."
     if dialogueST.get_actions_performed() != "":

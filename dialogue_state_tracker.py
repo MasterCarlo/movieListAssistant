@@ -1,6 +1,6 @@
 #This is the dialogue state tracker object, takes care also of the MEMORY (last N turns)
 
-N: int = 10 # number of turns to keep in memory
+N: int = 6 # number of turns to keep in memory
 
 class DialogueStateTracker:
     def __init__(self):

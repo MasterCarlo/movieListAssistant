@@ -6,7 +6,7 @@ import tmdb_api
 from global_variables import *
 from list_database import ListDatabase
 from dialogue_state_tracker import DialogueStateTracker
-from utils import Unsuccess
+from natural_language_generator import Unsuccess
 
 API_KEY = "037ff6ba26f3d5215cef3868aa3c8f73"
 tmdb = tmdb_api.MovieDatabase(API_KEY)
@@ -252,15 +252,61 @@ def showExistingList(intention: dict, list_db: ListDatabase) -> str:
         action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for all lists"
         return action_performed + ";"
     else:
-        movie_list: dict = list_db.get_list(list_name)
+        movie_list: dict | None = list_db.get_list(list_name)
         if movie_list is not None:
-            print(f"Contents of list '{list_name}':")
-            for title, details in movie_list.items():
-                print(f"- {title}: {details}")
-            tmdb._print_media_info()
+            print(f"Sure! here are the contents of list '{list_name}':")
+            for title, film in movie_list.items():
+                movie = film[0]
+                media_type = movie.get('type')
+
+                if media_type == "movie":
+                    details = tmdb._get_movie_details(movie['id'])
+                    if not details:
+                        continue
+                    release_date = details.get('release_date')
+                    poster_path = details.get('poster_path')
+                    info = {
+                        'type': 'movie',
+                        'id': movie.get('id'),
+                        'title': movie.get('title', 'N/A'),
+                        'year': release_date[:4] if release_date else 'N/A',
+                        'rating': movie.get('rating', 'N/A'),
+                        'runtime': details.get('runtime', 'N/A'),
+                        'genres': [g['name'] for g in details.get('genres', [])],
+                        'plot': movie.get('plot', 'N/A'),
+                        'budget': movie.get('budget', 0),
+                        'revenue': movie.get('revenue', 0),
+                        'poster': f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else 'N/A',
+                        'url': f"https://www.themoviedb.org/movie/{movie.get('id')}"
+                    }
+
+
+                elif media_type == "tv":
+                    details = tmdb._get_tv_details(movie['id'])
+                    if not details:
+                        continue
+
+                    first_air = details.get('first_air_date')
+                    info = {
+                        'type': 'tv',
+                        'id': movie.get('id'),
+                        'title': details.get('name', 'N/A'),
+                        'year': first_air[:4] if first_air else 'N/A',
+                        'rating': details.get('vote_average', 'N/A'),
+                        'seasons': details.get('number_of_seasons', 0),
+                        'episodes': details.get('number_of_episodes', 0),
+                        'genres': [g['name'] for g in details.get('genres', [])],
+                        'plot': details.get('overview', 'N/A'),
+                        'url': f"https://www.themoviedb.org/tv/{movie.get('id')}"
+                    }
+                else:
+                    if DEBUG or DEBUG_LLM:
+                        print(f"Unknown media type for '{title}'. Skipping.")
+                    continue
+                tmdb._print_media_info(info)
         else:
             print(f"List '{list_name}' does not exist.")
-            return 
+            return ""
     
     action_performed: str = f"{SHOW_EXISTING_LIST_INTENT} for list name '{list_name}'"
     return action_performed + ";"
@@ -271,7 +317,7 @@ def cancelRequest(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
     if DEBUG or DEBUG_LLM:
         print("DEBUG in actions.cancelRequest")
     
-    request_to_cancel: str = intention.get("request")
+    request_to_cancel: str = intention.get("intent_to_cancel")
     if DEBUG or DEBUG_LLM:
         print(f"Cancelling request: {request_to_cancel}")
     
@@ -284,6 +330,7 @@ def cancelRequest(intention: dict, list_db: ListDatabase, dialogueST: DialogueSt
         updated_intentions.append(intent)
     
     action_performed: str = f"{CANCEL_REQUEST_INTENT} for request '{request_to_cancel}'"
+    dialogueST.update_intentions((updated_intentions))
     return action_performed + ";"
 
 
@@ -295,7 +342,4 @@ def handleOther(intention: dict) -> str:
     request: str = intention.get("text_of_the_request")
     if DEBUG or DEBUG_LLM:
         print(f"Handling other intent with request: {request}")
-    return request
-
-def successfulOutcome():
-    pass      
+    return request     

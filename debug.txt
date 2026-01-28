@@ -17,5 +17,8 @@ Hi I want to create a new list called good movies
 can you add the dark knight rises to the list? and also Avatar
 Thank you. Can you show me the list good movies?
 
-
-TODO: dire a gpt di rifrasare queste:
+Can you add Inception to a new list called Favourites?
+Can you add also The Dark Knight?
+Can you show me the list Favourites?
+What’s the genre and rating of Interstellar?
+I want to add a movie to the list favourites 

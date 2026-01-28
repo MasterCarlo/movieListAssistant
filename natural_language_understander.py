@@ -21,8 +21,9 @@ def fillWithCurrentInfo(process: subprocess.Popen, dialogueST: DialogueStateTrac
     existing_lists: str = ""
     if list_db.get_all_lists() != {}:
         existing_lists = ALL_LISTS + list_db.get_all_lists().keys().__str__() + "."
-    instruction: str = f"""You are a movie list assistant, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT}, {CANCEL_REQUEST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. If the user asks something else, his intent must be classified as [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: [{', '.join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{', '.join(MOVIE_INFO_ACTIONS)}]. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. {existing_lists}. This is the content of your previous conversation with the user:" {last_N_turns}". Use the content of that conversation to fill the null slots inside this json file: {json_to_fill}. Be aware of typing errors of the user. If you think that some filled slots were filled incorrectly, feel free to fill them with the correct value, but be careful. If you don't find the information to fill a slot, leave it as null. Print ONLY this JSON file: {json_to_fill}, but with the null slots filled with the information you got and, if necessary, with the changed values for corrections, and NOTHING ELSE after."""
+    instruction: str = f"""You are a movie list assistant, you can help the user only {MODIFY_EXISTING_LIST_INTENT}, {CREATE_NEW_LIST_INTENT}, {CANCEL_REQUEST_INTENT} or answering to his {MOVIE_INFORMATION_REQUEST_INTENT}. I want you to only fill the null slots inside this json file: {json_to_fill}. If the user asks something else, his intent must be classified as [{OTHER_INTENT}]. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only action possible: [{', '.join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{', '.join(MOVIE_INFO_ACTIONS)}]. If the info request is even slightly different from these ones, the intent has to be considered {OTHER_INTENT}. {existing_lists}. This is the content of your previous conversation with the user:" {last_N_turns}". Use the content of that conversation to fill the null slots inside this json file: {json_to_fill}. Be aware of typing errors of the user. If you don't find the information to fill a slot, leave it as null. Print ONLY this JSON file: {json_to_fill}, but with the null slots filled with the information you got and, and NOTHING ELSE after."""
     filled_json: str = utils.askAndReadAnswer(process, instruction)
+    filled_json = jsonUnderstander(process, filled_json)
     filled_json_list: list[dict] = utils.stringToJson(filled_json)
     dialogueST.update_intentions(filled_json_list)
     unsuccess: Unsuccess = utils.llmSupervision(dialogueST)
@@ -41,6 +42,10 @@ def extractIntentions(json_answer: str) -> list[dict]:
         intentions: list[dict] = json.loads(json_answer)
         intentions_list_json: list[dict] = []
         for intention in intentions:
+            if not isinstance(intention, dict):
+                if DEBUG or DEBUG_LLM:
+                    print("Ignoring intention of type:", type(intention))
+                continue
             if CREATE_NEW_LIST_INTENT in intention.values():
                 intent: dict = json.loads("""{"intent":""" + """\"""" + CREATE_NEW_LIST_INTENT + """\", "list_name": null, "fulfilled": false}""")
                 intentions_list_json.append(intent)
@@ -71,17 +76,18 @@ def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracke
     if DEBUG or DEBUG_LLM:
         print("DEBUG in nlu.checkForIntention")
     user_response: str = dialogueST.get_last_user_input()
-    string: str = f"I want you to extract the intentions of the user from this user input (the last: {user_response})."
+    string: str = f"I want you to extract the intentions of the user from this user input: {user_response}."
     string2: str = ""
     if dialogueST.get_intentions_json() != []:
-        string: str = f"""This is the JSON with the previously expressed intentions of the user: {utils.jsonToString(dialogueST.get_intentions_json())}. I want you to extract, from this user input (the last: {user_response}), any NEW intention that is not already present in that json."""
+        string: str = f"""This is the JSON with the previously expressed intentions of the user: {utils.jsonToString(dialogueST.get_intentions_json())}. I want you to extract, from this user input: {user_response}), any NEW intention."""
         string2: str = f"The user can have the same intention as before but with a different data (for example asking about movie information as before, but for a different movie), if so, consider it a new intention"
     existing_lists: str = ""
     if list_db.get_all_lists() != {}:
         existing_lists = ALL_LISTS + list_db.get_all_lists().keys().__str__() + "."
     last_N_turns: str = " ".join(dialogueST.get_last_N_turns())
-    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". {string}. They can be: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}]. Every intent that is not in this list, MUST to be classified as [{OTHER_INTENT}]. {string2}. {existing_lists}. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only actions possible: [{", ".join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{", ".join(MOVIE_INFO_ACTIONS)}]. If the user wants to know anything else, like the title of a movie, the country etc., you have to consider the intent as {OTHER_INTENT}. If and only if there are new intentions, print ONLY a json file with ONLY the new intentions and nothing else; otherwise print an empty json list. For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]."""
+    instruction: str = f"""You are a movie list assistant. This is the content of your previous conversation with the user: "{last_N_turns}". {string}. Between these intents: [{CREATE_NEW_LIST_INTENT}], [{MODIFY_EXISTING_LIST_INTENT}], [{SHOW_EXISTING_LIST_INTENT}], [{MOVIE_INFORMATION_REQUEST_INTENT}], [{CANCEL_REQUEST_INTENT}], [{OTHER_INTENT}], I want you to extract the user intent. Every intent that is not in this list, MUST be classified as [{OTHER_INTENT}]. {string2}. {existing_lists}. The [{CANCEL_REQUEST_INTENT}] intention is hard to catch, it's rarely explicit: if the user say something like "never mind", "I don't care anymore", "go on", "don't worry" etc., probably he wants to cancel his previous request. For the {MODIFY_EXISTING_LIST_INTENT}, these are the only actions possible: [{", ".join(MODIFY_LIST_ACTIONS)}]. If the action is even slightly different from these ones, the intent has to be considered [{OTHER_INTENT}]. For the {MOVIE_INFORMATION_REQUEST_INTENT}, these are the only info requests possible: [{", ".join(MOVIE_INFO_ACTIONS)}]. If the user wants to know anything else, like the title of a movie, the country etc., you have to consider the intent as {OTHER_INTENT}. If there intentions, print ONLY a json file with ONLY the new intentions and nothing else; otherwise, IF AND ONLY IF there are no intentions, print an empty json list []. For example: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention":"{MODIFY_EXISTING_LIST_INTENT}"}}]."""
     json_intentions: str = utils.askAndReadAnswer(process, instruction)
+    json_intentions = jsonUnderstander(process, json_intentions)
     if DEBUG or DEBUG_LLM:
         print("New intentions JSON Answer received in checkForIntentions: ", json_intentions)
     if json_intentions != "[]":
@@ -93,3 +99,24 @@ def checkForIntention(process: subprocess.Popen, dialogueST: DialogueStateTracke
             print("Updated intentions in dialogue state tracker in checkForIntention:", json.dumps(dialogueST.get_intentions_json(), indent=2))
     elif DEBUG or DEBUG_LLM:
         print("No new intentions found in checkForIntention.")
+
+
+# Qwen3 went crazy while recording the video and can't print json anymore, we ask it to review its own json prints     
+def jsonUnderstander(process: subprocess.Popen, json_intentions: str) -> str:
+    if DEBUG or DEBUG_LLM:
+        print("DEBUG in nlu.jsonUnderstander")
+        print("JSON intentions to review:", json_intentions)
+    instruction: str = f"""Given this json string: {json_intentions}, review it and fix any mistakes you find inside it, like mismatched brackets or missing commas. Every \"intention:\" has to be in a separate json object, so inside its own set of {{}}. If there are only ["generic thing": "generic value"] without {{}} in the inside, correct it. Here is an example of a correct one: [{{"intention": "{MOVIE_INFORMATION_REQUEST_INTENT}"}}, {{"intention": " {MODIFY_EXISTING_LIST_INTENT}"}}, {{{{"intention":"modify existing list","list_name":"something","action":["add object"],"object_title":"Movie"}}}}]. If you receive an empty list [], print again an empty list []; else print ONLY the reviewed json string and NOTHING ELSE after"""
+    if json_intentions.strip() == '[]':
+        return json_intentions
+    if ('{' not in json_intentions or '}' not in json_intentions) or ('[' not in json_intentions or ']' not in json_intentions):
+        reviewed_json: str = utils.askAndReadAnswer(process, instruction)
+    else:
+        try:
+            json.loads(json_intentions)
+            return json_intentions
+        except json.JSONDecodeError:
+            reviewed_json: str = utils.askAndReadAnswer(process, instruction)
+    if DEBUG or DEBUG_LLM:
+        print("Reviewed JSON received in jsonUnderstander: ", reviewed_json)
+    return reviewed_json
